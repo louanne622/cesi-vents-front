@@ -35,20 +35,6 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Logo fixe en haut pour mobile */}
-      <div className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-center md:hidden z-50">
-        <Link href="/" className="flex items-center space-x-2">
-          <Image
-            src="/cesi-logo.png"
-            alt="CESI Logo"
-            width={32}
-            height={32}
-            className="w-8 h-8"
-          />
-          <span className="text-xl font-bold text-gray-900">CESI Vents</span>
-        </Link>
-      </div>
-
       {/* Version mobile nav */}
       <nav className="fixed md:hidden bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
         <div className="flex justify-around items-center h-16">
