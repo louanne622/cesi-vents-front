@@ -3,12 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaBell, FaCog } from "react-icons/fa";
-import { useState } from "react";
 import Image from "next/image";
 
 const Navbar = () => {
   const pathname = usePathname();
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const navItems = [
     {
