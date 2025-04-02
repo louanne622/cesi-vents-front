@@ -24,7 +24,7 @@ export default function RootLayout({
       <body className={`font-sans antialiased bg-gray-50 min-h-screen`}>
         <Navbar />
         {/* Contenu principal sans le padding-top */}
-        <main className="md:pl-64 pb-16 md:pb-8">
+        <main className="md:pl-64 pb-16 md:pb-8" style={{ paddingBottom: '0px' }}>
           <div>
             {children}
           </div>
