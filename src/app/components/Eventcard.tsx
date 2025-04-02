@@ -1,8 +1,11 @@
+'use client'
+
 import React from 'react';
 import Image from 'next/image';
 import { IoLocationSharp } from 'react-icons/io5';
 import { IoTimeOutline } from 'react-icons/io5';
 import Date from './ui/Date';
+import Button from './ui/Button';
 
 interface EventCardProps {
   title?: string;
@@ -64,10 +67,15 @@ const EventCard: React.FC<EventCardProps> = ({ title, imageUrl, place, schedule,
         {/* Space between content and button */}
         <div className="mt-6"></div>
 
-        {/* Button */}
-        <button className="absolute bottom-4 right-4 bg-[#fbe216] hover:bg-[#e6cf14] text-gray-900 rounded-lg px-4 py-1 text-sm">
-          Reserve
-        </button>
+        {/* Button component */}
+        <div className="absolute bottom-4 right-4">
+          <Button 
+            text="Reserve" 
+            color="primary" 
+            size="sm" 
+            onClick={() => {}} 
+          />
+        </div>
       </div>
     </div>
   );
