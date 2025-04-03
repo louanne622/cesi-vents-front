@@ -108,17 +108,15 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Profil utilisateur */}
+        {/* Section connexion */}
         <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center space-x-3 px-4 py-3">
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-              <FaUser className="h-5 w-5 text-gray-500" />
-            </div>
-            <div>
-              <p className="font-medium text-gray-900">John Doe</p>
-              <p className="text-sm text-gray-500">Étudiant</p>
-            </div>
-          </div>
+          <Link
+            href="/login"
+            className="flex items-center justify-center space-x-2 px-4 py-3 bg-[#fbe216] text-gray-900 rounded-lg hover:bg-[#e6cf14] transition-colors duration-200"
+          >
+            <FaUser className="h-5 w-5" />
+            <span className="font-medium">Connexion</span>
+          </Link>
         </div>
       </aside>
     </>
