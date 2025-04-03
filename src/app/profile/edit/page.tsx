@@ -99,7 +99,7 @@ export default function EditProfilePage() {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                      className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                     />
                   </div>
                   <div>
@@ -109,7 +109,7 @@ export default function EditProfilePage() {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                      className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -120,7 +120,7 @@ export default function EditProfilePage() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                    className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -130,7 +130,7 @@ export default function EditProfilePage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                    className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -139,7 +139,7 @@ export default function EditProfilePage() {
                     name="campus"
                     value={formData.campus}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                    className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                   >
                     <option value="Lille">Lille</option>
                     <option value="Paris">Paris</option>

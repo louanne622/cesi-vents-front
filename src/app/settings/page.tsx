@@ -21,8 +21,8 @@ const SettingsPage = () => {
               <Image
                 src="/img/cesi4.png"
                 alt="CESI Logo"
-                width={40}
-                height={40}
+                width={60}
+                height={60}
                 className="object-contain"
               />
             </div>
@@ -119,7 +119,7 @@ const SettingsPage = () => {
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+              className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
             >
               <option value="fr">Français</option>
               <option value="en">English</option>
