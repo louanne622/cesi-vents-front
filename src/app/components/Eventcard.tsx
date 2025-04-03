@@ -6,8 +6,10 @@ import { IoLocationSharp } from 'react-icons/io5';
 import { IoTimeOutline } from 'react-icons/io5';
 import Date from './ui/Date';
 import Button from './ui/Button';
+import { useRouter } from 'next/navigation';
 
 interface EventCardProps {
+  id: string;
   title?: string;
   imageUrl?: string;
   place?: string;
@@ -18,9 +20,18 @@ interface EventCardProps {
   };
 }
 
-const EventCard: React.FC<EventCardProps> = ({ title, imageUrl, place, schedule, date }) => {
+const EventCard: React.FC<EventCardProps> = ({ id, title, imageUrl, place, schedule, date }) => {
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push(`/events/${id}`);
+  };
+
   return (
-    <div className="relative w-full max-w-xs bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div 
+      className="relative w-full max-w-xs bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300"
+      onClick={handleClick}
+    >
       {/* Container with background - increased height */}
       <div className="relative w-full" style={{ paddingTop: '40%' }}>
         {/* Image container */}
@@ -70,10 +81,12 @@ const EventCard: React.FC<EventCardProps> = ({ title, imageUrl, place, schedule,
         {/* Button component */}
         <div className="absolute bottom-4 right-4">
           <Button 
-            text="Reserve" 
+            text="Voir plus" 
             color="primary" 
             size="sm" 
-            onClick={() => {}} 
+            onClick={() => {
+              router.push(`/events/${id}`);
+            }} 
           />
         </div>
       </div>
