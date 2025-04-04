@@ -22,9 +22,6 @@ jobs:
       - name: Installer les dépendances
         run: npm install
 
-      - name: Installer Tailwind CSS
-        run: npm install --save-dev @tailwindcss/oxide
-
       - name: Build de l'app Next.js
         run: npm run build
 
