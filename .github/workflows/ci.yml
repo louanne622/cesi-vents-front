@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Cache Cypress binary
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            cypress-${{ runner.os }}-
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Lint
+        run: npm run lint
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Cypress tests (Desktop)
+        uses: cypress-io/github-action@v5
+        with:
+          build: npm run build
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          record: false
+          spec: "cypress/e2e/**/*.cy.js"
+          config: "viewportWidth=1280,viewportHeight=720"
+      
+      - name: Cypress tests (Mobile)
+        uses: cypress-io/github-action@v5
+        with:
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          record: false
+          spec: "cypress/e2e/**/*.cy.js"
+          config: "viewportWidth=375,viewportHeight=812"
+      
+      - name: Upload Cypress screenshots
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      
+      - name: Upload Cypress videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos 
