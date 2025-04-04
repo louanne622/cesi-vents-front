@@ -19,7 +19,9 @@ jobs:
         run: node --version
 
       - name: Install dependencies
-        run: npm i
+        run: |
+          npm ci
+          npm install @next/swc-linux-x64-gnu @next/swc-linux-x64-musl @tailwindcss/oxide-linux-x64-gnu
 
       - name: Cypress run
         uses: cypress-io/github-action@v5
