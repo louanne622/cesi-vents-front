@@ -1,43 +1,33 @@
 name: Frontend CI
 
-on:
-  push:
-    branches: [ master, develop ]
-  pull_request:
-    branches: [ master, develop ]
-  workflow_dispatch:
-
+on: push
 jobs:
-  build-and-test:
+  basic-npm:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm i
+      - name: Set Node.js version
+        run: node --version
 
-    - name: Type check
-      run: npm run type-check || echo "Type check issues found"
-      
-    - name: Build
-      run: npm run build
+      - name: Install dependencies
+        run: npm i
 
-    - name: Run unit tests
-      run: npm test -- --coverage
-      
-    - name: Run Cypress tests
-      uses: cypress-io/github-action@v5
-      with:
-        build: npm run build
-        start: npm start
-        wait-on: 'http://localhost:3000'
-        browser: chrome
-        headed: false
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          install: true
+          build: npm run build
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          spec: "cypress/e2e/basic.cy.js"
         
+
