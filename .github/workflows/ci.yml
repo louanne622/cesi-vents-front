@@ -20,7 +20,10 @@ jobs:
           node-version: 18
 
       - name: Installer les dépendances
-        run: npm ci
+        run: npm install
+
+      - name: Installer Tailwind CSS
+        run: npm rebuild
 
       - name: Build de l'app Next.js
         run: npm run build
