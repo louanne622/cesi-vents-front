@@ -23,7 +23,7 @@ jobs:
         run: npm install
 
       - name: Installer Tailwind CSS
-        run: npm rebuild
+        run: npm install --save-dev @tailwindcss/oxide
 
       - name: Build de l'app Next.js
         run: npm run build
