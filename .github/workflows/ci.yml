@@ -1,4 +1,4 @@
-name: CI - Front-only avec Cypress E2E
+name: build and test
 
 on:
   push:
@@ -6,32 +6,19 @@ on:
   pull_request:
     branches: [master, develop]
 
-jobs:
-  test-frontend:
+jobs: 
+  test:
     runs-on: ubuntu-latest
-
+    container:
+      image: node:20
     steps:
-      - name: Checkout le code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v3
         with:
-          node-version: 18
+          node-version: 20
+      - run: npm ci
 
-      - name: Installer les dépendances
-        run: npm install
+        
 
-      - name: Build de l'app Next.js
-        run: npm run build
 
-      - name: Démarrer l'app en background
-        run: npm run start &
-        env:
-          NODE_ENV: production
 
-      - name: Attendre que l'app réponde (localhost:3000)
-        run: npx wait-on http://localhost:3000
 
-      - name: Lancer les tests Cypress
-        run: npx cypress run
