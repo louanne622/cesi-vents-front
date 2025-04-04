@@ -212,13 +212,15 @@ export default function EditClubPage({ params }: { params: Promise<PageParams> }
                   <FaImage className="h-5 w-5 text-gray-500 mr-2" />
                   <span>Changer l'image</span>
                 </label>
-                <div className="relative h-20 w-20">
-                  <img
-                    src={formData.image}
-                    alt="Club"
-                    className="object-cover rounded-lg"
-                  />
-                </div>
+                {formData.image && (
+                  <div className="relative h-20 w-20">
+                    <img
+                      src={formData.image}
+                      alt="Club"
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
