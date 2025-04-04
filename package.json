@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "tailwindcss",
+    "postinstall": "npx tailwindcss",
     "lint": "next lint",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
