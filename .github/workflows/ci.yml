@@ -25,6 +25,14 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Start Next.js in background
+        run: npm run start &
+        env:
+          NODE_ENV: production
+
+      - name: Wait for Next.js to start
+        run: npx wait-on http://localhost:3000
+
       - name: Run Cypress tests
         run: npm run test:e2e
 
