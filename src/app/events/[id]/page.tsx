@@ -110,7 +110,6 @@ export default function EventDetailPage() {
             className="object-cover"
           />
         </div>
-
         {/* Informations principales */}
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">{event.title}</h1>
@@ -159,3 +158,4 @@ export default function EventDetailPage() {
     </div>
   );
 } 
+

@@ -1,55 +1,99 @@
+
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Button from '../components/ui/Button';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import Image from 'next/image';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { register } from '@/redux/features/authSlice';
 
 const Register = () => {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { isLoading, error, token } = useAppSelector((state) => state.auth);
+
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formError, setFormError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (token) {
+      router.push('/');
+    }
+  }, [token, router]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Logique d'inscription à implémenter
+    setFormError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setFormError('Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    const { confirmPassword, ...registerData } = formData;
+    await dispatch(register(registerData));
   };
 
   return (
     <div className="min-h-screen bg-white pb-16 md:pb-0">
       <div className="container mx-auto px-4 py-8">
         <div className="w-full max-w-md mx-auto">
-          
-
-          <div className="w-full" style={{ marginTop: '10px' }}>
+          <div className="w-full bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Inscription</h2>
             
+            {(error || formError) && (
+              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+                {error || formError}
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Nom */}
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-1">
                   Nom
                 </label>
                 <input
                   type="text"
-                  id="lastName"
-                  name="lastName"
-                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900"
+                  id="last_name"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
                   required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               {/* Prénom */}
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mb-1">
                   Prénom
                 </label>
                 <input
                   type="text"
-                  id="firstName"
-                  name="firstName"
-                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900"
+                  id="first_name"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
                   required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -62,9 +106,11 @@ const Register = () => {
                   type="email"
                   id="email"
                   name="email"
-                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900"
-                  placeholder="exemple@email.com"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="exemple@email.com"
                 />
               </div>
 
@@ -78,9 +124,11 @@ const Register = () => {
                     type={showPassword ? "text" : "password"}
                     id="password"
                     name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900 pr-10"
                     placeholder="••••••••"
-                    required
                   />
                   <button
                     type="button"
@@ -102,9 +150,11 @@ const Register = () => {
                     type={showConfirmPassword ? "text" : "password"}
                     id="confirmPassword"
                     name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900 pr-10"
                     placeholder="••••••••"
-                    required
                   />
                   <button
                     type="button"

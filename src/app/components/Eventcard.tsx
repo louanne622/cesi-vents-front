@@ -25,6 +25,7 @@ const EventCard: React.FC<EventCardProps> = ({
   schedule,
   date,
 }) => {
+
   const router = useRouter();
 
   const handleClick = () => {

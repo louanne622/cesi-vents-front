@@ -10,25 +10,21 @@ import { FaSearch } from 'react-icons/fa';
 // Données de démonstration (à remplacer par un appel API)
 const eventsListData = [
   {
-    id: 1,
+    id: "1",
     title: "Soirée d'intégration CESI",
     description: "Rejoignez-nous pour une soirée exceptionnelle pour accueillir les nouveaux étudiants du CESI. Au programme : animations, musique et surprises !",
-    date: {
-      day: "15",
-      month: "Septembre"
-    },
+    date: "2024-09-15",
     time: "19:00",
     location: "Campus CESI - Hall Principal",
     image: "/img/lan.jpg",
     category: "Social",
     organizer: "BDE CESI",
     price: "Gratuit",
-    participants: {
-      current: 120,
-      max: 200
-    }
+    currentParticipants: 120,
+    maxParticipants: 200
   },
   {
+
     id: 2,
     title: "Tournoi de Jeux Vidéo",
     description: "Participez à notre tournoi de jeux vidéo ! Au programme : League of Legends, Valorant, et bien d'autres. Des lots à gagner !",
@@ -155,6 +151,7 @@ export default function EventsPage() {
                 setSelectedCategory('Tous');
               }}
             />
+
           </div>
         )}
       </div>

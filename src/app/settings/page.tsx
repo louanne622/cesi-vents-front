@@ -1,11 +1,27 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Button from '../components/ui/Button';
 import { FaBell, FaLock, FaUser, FaPalette, FaLanguage, FaSignOutAlt } from 'react-icons/fa';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { getProfile } from '@/redux/features/authSlice';
+import { useRouter } from 'next/navigation';
 
 const SettingsPage = () => {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { profile, isLoading, error, token } = useAppSelector((state) => state.auth);
+
+  useEffect(() => { 
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    dispatch(getProfile());
+  }, [dispatch, router, token]);
+
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState('fr');
@@ -35,16 +51,17 @@ const SettingsPage = () => {
                 <FaUser className="h-8 w-8 text-gray-500" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">John Doe</h2>
-                <p className="text-sm text-gray-500">Étudiant CESI</p>
+                <h2 className="text-lg font-semibold text-gray-900">{profile?.first_name} {profile?.last_name}</h2>
+                <p className="text-sm text-gray-500">Étudiant CESI {profile?.campus} </p>
               </div>
             </div>
-            <Button
-              text="Modifier le profil"
-              color="primary"
-              variant="outline"
-              onClick={() => {}}
-            />
+            <Link href="/profile/edit">
+              <Button
+                text="Modifier le profil"
+                color="primary"
+                variant="outline"
+              />
+            </Link>
           </div>
 
           {/* Notifications */}
