@@ -1,16 +1,32 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from './ui/Button';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { login } from '@/redux/features/authSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { useRouter } from 'next/navigation';
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  
+  const { isLoading, error, token } = useAppSelector((state) => state.auth);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (token) {
+      router.push('/');
+    }
+  }, [token, router]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Logique de connexion à implémenter
+    console.log('Form submitted:', { email, password });
+    await dispatch(login({ email, password }) as any);
   };
 
   const togglePasswordVisibility = () => {
@@ -30,6 +46,8 @@ const LoginForm = () => {
             type="email"
             id="email"
             name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900"
             placeholder="exemple@email.com"
             required
@@ -45,6 +63,8 @@ const LoginForm = () => {
               type={showPassword ? "text" : "password"}
               id="password"
               name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900 pr-10"
               placeholder="••••••••"
               required
@@ -79,13 +99,17 @@ const LoginForm = () => {
           </Link>
         </div>
 
+        {error && (
+          <div className="text-red-500 text-sm text-center">{error}</div>
+        )}
         <div className="mt-6">
           <Button
-            text="Se connecter"
+            text={isLoading ? "Connexion..." : "Se connecter"}
             color="primary"
             type="submit"
             onClick={() => {}}
             fullWidth
+            disabled={isLoading}
           />
         </div>
 

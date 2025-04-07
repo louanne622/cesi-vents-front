@@ -3,7 +3,7 @@
 import React from "react";
 
 type ButtonProps = {
-  onClick: () => void;
+  onClick?: () => void;
   text: string;
   color?: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "light" | "dark";
   variant?: "solid" | "outline" | "ghost";
@@ -90,7 +90,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       type={type}
-      onClick={onClick}
+      onClick={onClick || (() => {})}
       disabled={disabled}
       className={`
         ${baseStyles}

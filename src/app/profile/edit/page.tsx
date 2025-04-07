@@ -1,37 +1,61 @@
 "use client";
 
-import React, { useState } from 'react';
-import Image from 'next/image';
+import React, { useState, useEffect } from 'react';
 import Button from '../../components/ui/Button';
-import { FaUser, FaCamera, FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
+import ProfilePictureUpload from '@/app/components/ProfilePictureUpload';
+import { useRouter } from 'next/navigation';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { getProfile, updateProfile } from '@/redux/features/authSlice';
 
 export default function EditProfilePage() {
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { profile, isLoading, error, token } = useAppSelector((state) => state.auth);
+
   const [formData, setFormData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@viacesi.fr',
-    phone: '+33 6 12 34 56 78',
-    campus: 'Lille',
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    campus: '',
+    role: '',
+    bde_member: false
   });
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setProfileImage(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(e.target.files[0]);
+  useEffect(() => {
+    if (!token) {
+      router.push('/login');
+      return;
     }
-  };
+    if (!profile) {
+      dispatch(getProfile());
+    } else {
+      setFormData({
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        campus: profile.campus || '',
+        role: profile.role || 'user',
+        bde_member: profile.bde_member || false
+      });
+    }
+  }, [dispatch, router, token, profile]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Logique de sauvegarde à implémenter
-    console.log('Données à sauvegarder:', formData);
+    try {
+      const result = await dispatch(updateProfile(formData)).unwrap();
+      if (result) {
+        router.push('/profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -57,34 +81,8 @@ export default function EditProfilePage() {
 
           <form onSubmit={handleSubmit}>
             {/* Photo de profil */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6" style={{ paddingTop: '0px' }}   >
-              <div className="flex flex-col items-center">
-                <div className="relative w-32 h-32 mb-4">
-                  <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                    {profileImage ? (
-                      <Image
-                        src={profileImage}
-                        alt="Photo de profil"
-                        width={128}
-                        height={128}
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <FaUser className="h-16 w-16 text-gray-500" />
-                    )}
-                  </div>
-                  <label className="absolute bottom-0 right-0 bg-yellow-400 text-white rounded-full p-2 cursor-pointer hover:bg-yellow-500">
-                    <FaCamera className="h-5 w-5" />
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
-                  </label>
-                </div>
-                <p className="text-sm text-gray-500">Cliquez pour changer la photo</p>
-              </div>
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-6" style={{ paddingTop: '0px' }}>
+              <ProfilePictureUpload />
             </div>
 
             {/* Informations personnelles */}
@@ -96,8 +94,8 @@ export default function EditProfilePage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
                     <input
                       type="text"
-                      name="firstName"
-                      value={formData.firstName}
+                      name="first_name"
+                      value={formData.first_name}
                       onChange={handleChange}
                       className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                     />
@@ -106,8 +104,8 @@ export default function EditProfilePage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
                     <input
                       type="text"
-                      name="lastName"
-                      value={formData.lastName}
+                      name="last_name"
+                      value={formData.last_name}
                       onChange={handleChange}
                       className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                     />
@@ -157,14 +155,13 @@ export default function EditProfilePage() {
                   text="Annuler"
                   color="secondary"
                   variant="outline"
-                  onClick={() => {}}
                 />
               </Link>
               <Button
-                text="Enregistrer"
+                text={isLoading ? 'Enregistrement...' : 'Enregistrer'}
                 color="primary"
                 type="submit"
-                onClick={() => {}}
+                disabled={isLoading}
               />
             </div>
           </form>
