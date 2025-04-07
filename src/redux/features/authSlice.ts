@@ -1,40 +1,65 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axiosInstance from '../../utils/axiosConfig';
+import { getRefreshToken, setAccessToken, setRefreshToken, clearTokens } from '../../utils/cookieService';
 import { RootState } from '../store';
-import axios from 'axios';
 
-interface AuthState {
-  user: any | null;
-  token: string | null;
-  isLoading: boolean;
-  error: string | null;
-  profile: any | null;
-}
-
-const initialState: AuthState = {
-  user: null,
-  token: null,
-  isLoading: false,
-  error: null,
-  profile: null,
-};
-
+// Thunks manquants
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials: { email: string; password: string }, { rejectWithValue }) => {
     try {
-      console.log('Attempting login with:', credentials);
-      const response = await axios.post('http://localhost:3000/api/auth/login', credentials);
-      console.log('Login response:', response.data);
-      return response.data;
+      const response = await axiosInstance.post('/auth/login', credentials);
+      
+      const { accessToken, refreshToken, user } = response.data;
+      setAccessToken(accessToken);
+      setRefreshToken(refreshToken);
+
+      return { user, accessToken, refreshToken };
     } catch (error: any) {
-      console.error('Login error:', error.response?.data || error.message);
       return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
 );
 
+export const register = createAsyncThunk(
+  'auth/register',
+  async (userData: { email: string; password: string; first_name: string; last_name: string }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('/auth/register', userData);
+      
+      const { accessToken, refreshToken, user } = response.data;
+      setAccessToken(accessToken);
+      setRefreshToken(refreshToken);
+
+      return { user, accessToken, refreshToken };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Registration failed');
+    }
+  }
+);
+
+export const getProfile = createAsyncThunk(
+  'auth/profile',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as RootState;
+      const token = state.auth.token;
+      
+      if (!token) {
+        throw new Error('No token available');
+      }
+
+      const response = await axiosInstance.get('/auth/profil');
+      
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch profile');
+    }
+  }
+);
+
 export const updateProfile = createAsyncThunk(
-  'auth/settings',
+  'auth/updateProfile',
   async (userData: {
     first_name: string;
     last_name: string;
@@ -45,65 +70,18 @@ export const updateProfile = createAsyncThunk(
     bde_member: boolean;
   }, { getState, rejectWithValue }) => {
     try {
-      const state = getState() as { auth: AuthState };
+      const state = getState() as RootState;
       const token = state.auth.token;
       
       if (!token) {
         throw new Error('No token available');
       }
 
-      console.log('Updating profile with data:', userData);
-      console.log('Using token:', token);
-
-      const response = await axios.put('http://localhost:3000/api/auth/settings', userData, {
-        headers: {
-          'x-auth-token': token
-        }
-      });
+      const response = await axiosInstance.put('/auth/profil', userData);
       
-      console.log('Update profile response:', response.data);
       return response.data;
     } catch (error: any) {
-      console.error('Update profile error:', error.response?.data || error.message);
       return rejectWithValue(error.response?.data?.message || 'Failed to update profile');
-    }
-  }
-);
-
-export const getProfile = createAsyncThunk(
-  'auth/profil',
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const state = getState() as { auth: AuthState };
-      const token = state.auth.token;
-      
-      if (!token) {
-        throw new Error('No token available');
-      }
-
-      console.log('Making profile request with token:', token);
-      const response = await axios.get('http://localhost:3000/api/auth/profil', {
-        headers: {
-          'x-auth-token': token
-        }
-      });
-      console.log('Profile response:', response.data);
-      
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch profile');
-    }
-  }
-);
-
-export const register = createAsyncThunk(
-  'auth/register',
-  async (userData: { email: string; password: string; first_name: string; last_name: string }, { rejectWithValue }) => {
-    try {
-      const response = await axios.post('http://localhost:3000/api/auth/register', userData);
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }
 );
@@ -112,137 +90,224 @@ export const uploadProfilePicture = createAsyncThunk(
   'auth/uploadProfilePicture',
   async (formData: FormData, { getState, rejectWithValue }) => {
     try {
-      const state = getState() as { auth: AuthState };
+      const state = getState() as RootState;
       const token = state.auth.token;
       
       if (!token) {
         throw new Error('No token available');
       }
 
-      console.log('Updating profile with data:', formData);
-      console.log('Using token:', token);
-
-      // Ensure token is properly formatted
-      if (!token || typeof token !== 'string') {
-        throw new Error('Invalid token format');
-      }
-
-      const response = await axios.post('http://localhost:3000/api/auth/upload-profile-picture', formData, {
+      const response = await axiosInstance.post('/auth/profile-picture', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'x-auth-token': token
-        }
+        },
       });
       
-      console.log('Profile picture response:', response.data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || error.message || 'Failed to upload profile picture'
-      );
+      return rejectWithValue(error.response?.data?.message || 'Failed to upload profile picture');
     }
   }
 );
 
+// Interface et état
+export interface AuthState {
+  user: any;
+  token: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  // États de chargement individuels
+  isFetchingProfile: boolean;
+  isUpdatingProfile: boolean;
+  isUploadingPicture: boolean;
+  profile: any | null;
+}
+
+const initialState: AuthState = {
+  user: null,
+  token: null,
+  refreshToken: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null,
+  isFetchingProfile: false,
+  isUpdatingProfile: false,
+  isUploadingPicture: false,
+  profile: null,
+};
+
+// Thunk pour le rafraîchissement du token
+export const checkAuth = createAsyncThunk(
+  'auth/check',
+  async (_, { rejectWithValue }) => {
+    try {
+      const refreshToken = getRefreshToken();
+      
+      if (!refreshToken) {
+        return null;
+      }
+
+      const response = await axiosInstance.post('/auth/refresh-token', {}, {
+        headers: {
+          'x-refresh-token': refreshToken,
+        },
+      });
+
+      const { accessToken, user } = response.data;
+      setAccessToken(accessToken);
+      return { user, accessToken };
+    } catch (error: any) {
+      clearTokens();
+      return rejectWithValue(error.response?.data?.message || 'Session expired');
+    }
+  }
+);
+
+// Slice
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
     logout: (state) => {
+      state.isAuthenticated = false;
       state.user = null;
       state.token = null;
+      state.refreshToken = null;
       state.error = null;
-      state.profile = null;
+      state.isFetchingProfile = false;
+      state.isUpdatingProfile = false;
+      state.isUploadingPicture = false;
+      clearTokens();
     },
     clearError: (state) => {
       state.error = null;
     },
+    clearAuth: (state) => {
+      state.user = null;
+      state.token = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+      state.isLoading = false;
+      state.error = null;
+      state.isFetchingProfile = false;
+      state.isUpdatingProfile = false;
+      state.isUploadingPicture = false;
+    },
   },
   extraReducers: (builder) => {
+    // Gestion du checkAuth
+    builder
+      .addCase(checkAuth.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(checkAuth.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload?.user;
+        state.token = action.payload?.accessToken;
+        state.error = null;
+      })
+      .addCase(checkAuth.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.token = null;
+        state.refreshToken = null;
+        state.error = action.payload as string;
+      });
+
+    // Gestion du login
     builder
       .addCase(login.pending, (state) => {
-        console.log('Login: pending');
         state.isLoading = true;
         state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
-        console.log('Login: fulfilled', action.payload);
         state.isLoading = false;
-        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
         state.error = null;
-        // Sauvegarder le token dans localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('token', action.payload.token);
-        }
       })
       .addCase(login.rejected, (state, action) => {
-        console.log('Login: rejected', action.payload);
         state.isLoading = false;
         state.error = action.payload as string;
-      })
+        state.isAuthenticated = false;
+      });
+
+    // Gestion de la registration
+    builder
       .addCase(register.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.isAuthenticated = true;
         state.user = action.payload.user;
-        state.token = action.payload.token;
-        // Sauvegarder le token dans localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('token', action.payload.token);
-        }
+        state.token = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
+        state.error = null;
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
-      })
-      .addCase(updateProfile.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(updateProfile.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.profile = action.payload;
-      })
-      .addCase(updateProfile.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-      })
+        state.isAuthenticated = false;
+      });
+
+    // Gestion du profile
+    builder
       .addCase(getProfile.pending, (state) => {
-        state.isLoading = true;
+        state.isFetchingProfile = true;
         state.error = null;
       })
       .addCase(getProfile.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.isFetchingProfile = false;
         state.profile = action.payload;
         state.error = null;
       })
       .addCase(getProfile.rejected, (state, action) => {
-        state.isLoading = false;
+        state.isFetchingProfile = false;
         state.error = action.payload as string;
+      });
+
+    // Gestion de la mise à jour du profile
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.isUpdatingProfile = true;
+        state.error = null;
       })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.isUpdatingProfile = false;
+        state.profile = action.payload;
+        state.error = null;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.isUpdatingProfile = false;
+        state.error = action.payload as string;
+      });
+
+    // Gestion de l'upload de la photo de profil
+    builder
       .addCase(uploadProfilePicture.pending, (state) => {
-        state.isLoading = true;
+        state.isUploadingPicture = true;
         state.error = null;
       })
       .addCase(uploadProfilePicture.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.isUploadingPicture = false;
         state.profile = action.payload;
+        state.error = null;
       })
       .addCase(uploadProfilePicture.rejected, (state, action) => {
-        state.isLoading = false;
+        state.isUploadingPicture = false;
         state.error = action.payload as string;
       });
   },
 });
 
-
-
-export const logout = () => (dispatch: any) => {
-  localStorage.removeItem('token');
-  dispatch(authSlice.actions.logout());
-};
-
-export const { clearError } = authSlice.actions;
+export const { logout, clearError, clearAuth } = authSlice.actions;
 export default authSlice.reducer;
