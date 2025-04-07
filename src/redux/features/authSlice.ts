@@ -77,7 +77,7 @@ export const updateProfile = createAsyncThunk(
         throw new Error('No token available');
       }
 
-      const response = await axiosInstance.put('/auth/profil', userData);
+      const response = await axiosInstance.put('/auth/settings', userData);
       
       return response.data;
     } catch (error: any) {
