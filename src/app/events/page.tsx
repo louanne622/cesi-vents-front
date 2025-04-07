@@ -9,328 +9,243 @@ import { FaSearch, FaFilter } from 'react-icons/fa';
 // Ajout d'une nouvelle catégorie "Formation" dans certains événements
 const eventsListData = [
   {
-    id: 1,
+    id: "1",
     title: "Soirée d'intégration CESI",
     description: "Rejoignez-nous pour une soirée exceptionnelle pour accueillir les nouveaux étudiants du CESI. Au programme : animations, musique et surprises !",
-    date: {
-      day: "15",
-      month: "Septembre"
-    },
+    date: "2024-09-15",
     time: "19:00",
     location: "Campus CESI - Hall Principal",
     image: "/img/lan.jpg",
     category: "Social",
     organizer: "BDE CESI",
     price: "Gratuit",
-    participants: {
-      current: 120,
-      max: 200
-    }
+    currentParticipants: 120,
+    maxParticipants: 200
   },
   {
-    id: 2,
+    id: "2",
     title: "Hackathon IA & Innovation",
     description: "48h pour créer des solutions innovantes basées sur l'intelligence artificielle. Ouvert à tous les niveaux.",
-    date: {
-      day: "22",
-      month: "Octobre"
-    },
+    date: "2024-10-22",
     time: "09:00",
     location: "Campus CESI - Labo Tech",
     image: "/img/lan.jpg",
     category: "Technologie",
     organizer: "Club Tech CESI",
     price: "Gratuit",
-    participants: {
-      current: 45,
-      max: 60
-    }
+    currentParticipants: 45,
+    maxParticipants: 60
   },
   {
-    id: 3,
+    id: "3",
     title: "Atelier CV & LinkedIn",
     description: "Optimisez votre CV et votre profil LinkedIn pour maximiser vos chances lors de vos recherches de stage et d'emploi.",
-    date: {
-      day: "05",
-      month: "Novembre"
-    },
+    date: "2024-11-05",
     time: "14:30",
     location: "Campus CESI - Salle 103",
     image: "/img/lan.jpg",
     category: "Carrière",
     organizer: "Service Carrière CESI",
     price: "Gratuit",
-    participants: {
-      current: 30,
-      max: 40
-    }
+    currentParticipants: 30,
+    maxParticipants: 40
   },
   {
-    id: 4,
+    id: "4",
     title: "Tournoi e-sport inter-écoles",
     description: "Venez représenter CESI lors du plus grand tournoi e-sport inter-écoles de la région ! Jeux: LOL, CS:GO, et Rocket League.",
-    date: {
-      day: "12",
-      month: "Décembre"
-    },
+    date: "2024-12-12",
     time: "10:00",
     location: "Salle de conférence CESI",
     image: "/img/lan.jpg",
     category: "Loisirs",
     organizer: "Club Gaming CESI",
     price: "5€",
-    participants: {
-      current: 80,
-      max: 100
-    }
+    currentParticipants: 80,
+    maxParticipants: 100
   },
   {
-    id: 5,
+    id: "5",
     title: "Conférence Cybersécurité",
     description: "Une conférence passionnante sur les enjeux actuels de la cybersécurité avec des experts du domaine.",
-    date: {
-      day: "18",
-      month: "Janvier"
-    },
+    date: "2025-01-18",
     time: "14:00",
     location: "Amphi CESI",
     image: "/img/lan.jpg",
     category: "Technologie",
     organizer: "Club Sécurité CESI",
     price: "Gratuit",
-    participants: {
-      current: 65,
-      max: 120
-    }
+    currentParticipants: 65,
+    maxParticipants: 120
   },
   {
-    id: 6,
+    id: "6",
     title: "Soirée Réseautage Entreprises",
     description: "Rencontrez des professionnels de diverses entreprises partenaires du CESI dans une ambiance conviviale.",
-    date: {
-      day: "26",
-      month: "Janvier"
-    },
+    date: "2025-01-26",
     time: "18:30",
     location: "Campus CESI - Espace Carrière",
     image: "/img/lan.jpg",
     category: "Carrière",
     organizer: "Service Relations Entreprises",
     price: "Gratuit",
-    participants: {
-      current: 55,
-      max: 80
-    }
+    currentParticipants: 55,
+    maxParticipants: 80
   },
   {
-    id: 7,
+    id: "7",
     title: "Workshop Design Thinking",
     description: "Atelier pratique pour apprendre la méthodologie du design thinking et l'appliquer à vos projets.",
-    date: {
-      day: "03",
-      month: "Février"
-    },
+    date: "2025-02-03",
     time: "13:00",
     location: "Salle Créative CESI",
     image: "/img/lan.jpg",
     category: "Technologie",
     organizer: "Club Innovation CESI",
     price: "Gratuit",
-    participants: {
-      current: 25,
-      max: 30
-    }
+    currentParticipants: 25,
+    maxParticipants: 30
   },
   {
-    id: 8,
+    id: "8",
     title: "Gala annuel CESI",
     description: "Le gala annuel du CESI. Soirée élégante avec dîner, spectacle et soirée dansante.",
-    date: {
-      day: "14",
-      month: "Février"
-    },
+    date: "2025-02-14",
     time: "19:30",
     location: "Hôtel Le Grand Palace",
     image: "/img/lan.jpg",
     category: "Social",
     organizer: "BDE CESI",
     price: "45€",
-    participants: {
-      current: 180,
-      max: 250
-    }
+    currentParticipants: 180,
+    maxParticipants: 250
   },
   {
-    id: 9,
+    id: "9",
     title: "Journée Portes Ouvertes",
     description: "Visitez le campus, rencontrez les enseignants et découvrez les formations proposées par CESI.",
-    date: {
-      day: "25",
-      month: "Février"
-    },
+    date: "2025-02-25",
     time: "10:00",
     location: "Campus CESI",
     image: "/img/lan.jpg",
     category: "Information",
     organizer: "Administration CESI",
     price: "Gratuit",
-    participants: {
-      current: 0,
-      max: 500
-    }
+    currentParticipants: 0,
+    maxParticipants: 500
   },
   {
-    id: 10,
+    id: "10",
     title: "Challenge Robotique",
     description: "Compétition de robotique entre équipes d'étudiants : construisez, programmez et faites concourir votre robot.",
-    date: {
-      day: "07",
-      month: "Mars"
-    },
+    date: "2025-03-07",
     time: "09:00",
     location: "Campus CESI - Gymnase",
     image: "/img/lan.jpg",
     category: "Technologie",
     organizer: "Club Robotique CESI",
     price: "10€ par équipe",
-    participants: {
-      current: 12,
-      max: 20
-    }
+    currentParticipants: 12,
+    maxParticipants: 20
   },
   {
-    id: 11,
+    id: "11",
     title: "Marathon de Programmation",
     description: "24h de code non-stop : relevez des défis de programmation en équipe et gagnez des prix.",
-    date: {
-      day: "15",
-      month: "Mars"
-    },
+    date: "2025-03-15",
     time: "18:00",
     location: "Campus CESI - Espace Coworking",
     image: "/img/lan.jpg",
     category: "Technologie",
     organizer: "Club Dev CESI",
     price: "Gratuit",
-    participants: {
-      current: 40,
-      max: 60
-    }
+    currentParticipants: 40,
+    maxParticipants: 60
   },
   {
-    id: 12,
+    id: "12",
     title: "Forum des Associations",
     description: "Découvrez tous les clubs et associations du campus, rencontrez leurs membres et inscrivez-vous.",
-    date: {
-      day: "21",
-      month: "Mars"
-    },
+    date: "2025-03-21",
     time: "12:00",
     location: "Campus CESI - Hall Principal",
     image: "/img/lan.jpg",
     category: "Social",
     organizer: "Bureau des Associations",
     price: "Gratuit",
-    participants: {
-      current: 0,
-      max: 300
-    }
+    currentParticipants: 0,
+    maxParticipants: 300
   },
   {
-    id: 13,
+    id: "13",
     title: "Conférence Développement Durable",
     description: "Conférence sur les enjeux du développement durable dans l'ingénierie et comment construire un avenir plus vert.",
-    date: {
-      day: "04",
-      month: "Avril"
-    },
+    date: "2025-04-04",
     time: "15:30",
     location: "Amphi CESI",
     image: "/img/lan.jpg",
     category: "Information",
     organizer: "Green CESI",
     price: "Gratuit",
-    participants: {
-      current: 50,
-      max: 120
-    }
+    currentParticipants: 50,
+    maxParticipants: 120
   },
   {
-    id: 14,
+    id: "14",
     title: "Tournoi Sportif Inter-Promotions",
     description: "Compétition sportive entre les différentes promotions du CESI : football, basketball, volleyball et bien plus.",
-    date: {
-      day: "12",
-      month: "Avril"
-    },
+    date: "2025-04-12",
     time: "10:00",
     location: "Complexe Sportif CESI",
     image: "/img/lan.jpg",
     category: "Loisirs",
     organizer: "Bureau des Sports",
     price: "Gratuit",
-    participants: {
-      current: 80,
-      max: 200
-    }
+    currentParticipants: 80,
+    maxParticipants: 200
   },
   // Nouveaux événements avec la catégorie Formation
   {
-    id: 15,
+    id: "15",
     title: "Formation Docker pour débutants",
     description: "Apprenez les bases de Docker et de la conteneurisation pour améliorer vos déploiements d'applications.",
-    date: {
-      day: "20",
-      month: "Avril"
-    },
+    date: "2025-04-20",
     time: "09:30",
     location: "Salle Informatique CESI",
     image: "/img/lan.jpg",
     category: "Formation",
     organizer: "Département Informatique",
     price: "Gratuit pour les étudiants",
-    participants: {
-      current: 15,
-      max: 25
-    }
+    currentParticipants: 15,
+    maxParticipants: 25
   },
   {
-    id: 16,
+    id: "16",
     title: "Workshop React.js avancé",
     description: "Formation pratique sur les concepts avancés de React.js : hooks, context API, et optimisation des performances.",
-    date: {
-      day: "28",
-      month: "Avril"
-    },
+    date: "2025-04-28",
     time: "14:00",
     location: "Lab Digital CESI",
     image: "/img/lan.jpg",
     category: "Formation",
     organizer: "Club Web Development",
     price: "Gratuit",
-    participants: {
-      current: 18,
-      max: 20
-    }
+    currentParticipants: 18,
+    maxParticipants: 20
   },
   {
-    id: 17,
+    id: "17",
     title: "Atelier Management de Projet",
     description: "Formation complète sur les méthodologies agiles et leur application dans vos projets d'études et professionnels.",
-    date: {
-      day: "05",
-      month: "Mai"
-    },
+    date: "2025-05-05",
     time: "10:00",
     location: "Campus CESI - Salle 205",
     image: "/img/lan.jpg",
     category: "Formation",
     organizer: "Département Management",
     price: "Gratuit pour les étudiants",
-    participants: {
-      current: 22,
-      max: 30
-    }
+    currentParticipants: 22,
+    maxParticipants: 30
   }
 ];
 
@@ -441,11 +356,15 @@ export default function EventsPage() {
             filteredEvents.map((event) => (
               <div key={event.id} className="w-full max-w-xs mx-auto">
                 <EventCard 
+                  id={event.id}
                   title={event.title}
                   imageUrl={event.image}
                   place={event.location}
                   schedule={event.time}
-                  date={event.date}
+                  date={{
+                    day: new Date(event.date).getDate().toString(),
+                    month: new Date(event.date).toLocaleString('fr-FR', { month: 'long' })
+                  }}
                 />
               </div>
             ))
