@@ -67,7 +67,7 @@ export default function ProfilePage() {
               <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
                 {profile.logo ? (
                   <Image
-                    src={profile.logo.url}  
+                    src={profile.logo.url} 
                     alt={profile.logo.alt}
                     width={96}
                     height={96}

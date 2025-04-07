@@ -47,7 +47,7 @@ export default function ProfilePictureUpload() {
         <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
           {profile?.logo?.url ? (
             <Image
-              src={profile.logo.url}
+              src={profile.logo.url }
               alt={profile.logo.alt || 'Photo de profil'}
               width={128}
               height={128}
