@@ -12,7 +12,7 @@ import { getProfile } from '@/redux/features/authSlice';
 export default function ProfilePage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { profile, isLoading, error, token } = useAppSelector((state) => state.auth);
+  const { profile, isFetchingProfile, error, token } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (!token) {
@@ -22,7 +22,7 @@ export default function ProfilePage() {
     dispatch(getProfile());
   }, [dispatch, router, token]);
 
-  if (isLoading) {
+  if (isFetchingProfile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl">Chargement...</div>

@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import Image from 'next/image';
 import { FaUser, FaCamera } from 'react-icons/fa';
-import { uploadProfilePicture, getProfile } from '@/redux/features/authSlice';
+import { getProfile } from '@/redux/features/authSlice';
+import axiosInstance from '@/utils/axiosConfig';
 
 export default function ProfilePictureUpload() {
   const [isUploading, setIsUploading] = useState(false);
@@ -20,22 +21,58 @@ export default function ProfilePictureUpload() {
     setIsUploading(true);
     setError('');
 
-    console.log('Token:', token); //token
-
     try {
       if (!token) {
         throw new Error('Vous devez être connecté pour télécharger une image');
       }
 
+      // Vérifier le type de fichier
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Veuillez sélectionner une image');
+      }
+
+      // Vérifier la taille du fichier (par exemple, 5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('L\'image ne doit pas dépasser 5MB');
+      }
+
       const formData = new FormData();
       formData.append('image', file);
+      
+      console.log('Début de l\'upload, taille du fichier:', file.size);
 
-      await dispatch(uploadProfilePicture(formData)).unwrap();
+      // Utiliser l'axiosInstance directement avec le bon Content-Type
+      const response = await axiosInstance.post('/auth/upload-profile-picture', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json'
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log('Progress:', progress);
+          }
+        }
+      });
+
+      console.log('Réponse du serveur:', response.data);
+
+      // Rafraîchir le profil
       await dispatch(getProfile()).unwrap();
       
     } catch (error: any) {
-      console.error('Erreur lors du téléchargement:', error);
-      setError(error.message || 'Erreur lors du téléchargement de l\'image');
+      console.error('Erreur détaillée:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        config: error.config
+      });
+      
+      setError(
+        error.response?.data?.message || 
+        error.message || 
+        'Erreur lors du téléchargement de l\'image'
+      );
     } finally {
       setIsUploading(false);
     }
