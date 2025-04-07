@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { FaUsers, FaPlus } from 'react-icons/fa';
-import Button from '../../components/ui/Button';
-import FilterBar from '@/components/ui/FilterBar';
+import Button from '@/app/components/ui/Button';
+import FilterBar from '@/app/components/ui/FilterBar';
 
 // Données de démonstration (à remplacer par des appels API)
 const mockClubs = [

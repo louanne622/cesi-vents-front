@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import ClubCard from '../components/clubs/ClubCard';
-import FilterBar from '../components/events/FilterBar';
+import FilterBar from '@/app/components/ui/FilterBar';
 import SearchBar from '../components/events/SearchBar';
-import Button from '../components/ui/Button';
+import Button from '@/app/components/ui/Button';
 import { FaSearch, FaFilter } from 'react-icons/fa';
 
 const clubs = [

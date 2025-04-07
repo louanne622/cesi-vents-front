@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaImage, FaUsers, FaMapMarkerAlt, FaCalendarAlt, FaUser } from 'react-icons/fa';
-import Button from '../../../../components/ui/Button';
+import Button from '@/app/components/ui/Button';
 
 // Données de démonstration (à remplacer par un appel API)
 const mockClubData = {
@@ -240,19 +240,17 @@ export default function EditClubPage({ params }: { params: Promise<PageParams> }
             </div>
 
             {/* Boutons d'action */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="flex justify-end space-x-4">
               <Button
-                type="submit"
-                text="Enregistrer les modifications"
-                color="primary"
-                onClick={handleSubmit}
-              />
-              <Button
-                type="button"
                 text="Annuler"
                 color="secondary"
                 variant="outline"
-                onClick={() => router.push('/admin/clubs')}
+                onClick={() => router.back()}
+              />
+              <Button
+                text="Enregistrer"
+                color="primary"
+                onClick={handleSubmit}
               />
             </div>
           </form>

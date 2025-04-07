@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { FaEuroSign, FaChartLine, FaCalendarAlt, FaSearch } from 'react-icons/fa';
-import Button from '../../components/ui/Button';
+import Button from '@/app/components/ui/Button';
 
 // Données de démonstration (à remplacer par des appels API)
 const mockFinancialData = {
