@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './features/authSlice';
+import clubReducer from './features/clubSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-
+    club: clubReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

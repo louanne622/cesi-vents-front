@@ -4,9 +4,15 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaImage, FaUsers, FaMapMarkerAlt, FaCalendarAlt, FaUser } from 'react-icons/fa';
 import Button from '../../../components/ui/Button';
+import { createClub } from '@/redux/features/clubSlice';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/redux/store';
+import { toast } from 'react-hot-toast';
 
 export default function CreateClubPage() {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -16,9 +22,29 @@ export default function CreateClubPage() {
     leaderEmail: '',
   });
 
-  const handleSubmit = () => {
-    // TODO: Implémenter la logique de création du club
-    console.log('Club data:', formData);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const clubData = {
+        name: formData.name,
+        description: formData.description,
+        logo: {
+          url: formData.image,
+          alt: `${formData.name} logo`
+        },
+        email: formData.leaderEmail
+      };
+
+      await dispatch(createClub(clubData)).unwrap();
+      toast.success('Club créé avec succès !');
+      router.push('/admin/clubs');
+    } catch (error: any) {
+      toast.error(error.message || 'Une erreur est survenue lors de la création du club');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -47,7 +73,7 @@ export default function CreateClubPage() {
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Créer un nouveau club</h1>
           
-          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nom du club */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -195,9 +221,9 @@ export default function CreateClubPage() {
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button
                 type="submit"
-                text="Créer le club"
+                text={isLoading ? "Création en cours..." : "Créer le club"}
                 color="primary"
-                onClick={handleSubmit}
+                disabled={isLoading}
               />
               <Button
                 type="button"
