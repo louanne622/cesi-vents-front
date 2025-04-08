@@ -31,7 +31,14 @@ export default function CreateClubPage() {
   // Initialize currentClub with default values if not set
   useEffect(() => {
     if (!currentClub) {
-      
+      setFormat({
+        name: '',
+        description: '',
+        email: '',
+        logo: { url: '', alt: '' },
+        category: '',
+        campus: ''
+      });
     } else {
       setFormat({
         name: currentClub.name,
