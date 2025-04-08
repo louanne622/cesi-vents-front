@@ -3,7 +3,14 @@
 import { useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { FaCalendar, FaMapMarkerAlt, FaUser, FaUsers, FaMoneyBillWave, FaClock } from 'react-icons/fa';
+import {
+  FaCalendar,
+  FaMapMarkerAlt,
+  FaUser,
+  FaUsers,
+  FaMoneyBillWave,
+  FaClock,
+} from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { fetchEventById } from '@/redux/features/eventSlice';
@@ -43,7 +50,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#fbe216]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
       </div>
     );
   }
@@ -64,8 +71,9 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
-        {/* Bouton Retour */}
-        <button 
+
+        {/* Bouton retour */}
+        <button
           onClick={() => router.back()}
           className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
         >
@@ -86,15 +94,23 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
           />
         </div>
 
-        {/* Titre et informations principales */}
+        {/* Titre */}
         <h1 className="text-3xl font-bold text-gray-900 mb-6">{event.title}</h1>
 
+        {/* Détails principaux */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {/* Informations de base */}
+          {/* Infos de base */}
           <div className="space-y-4">
             <div className="flex items-center text-gray-600">
               <FaCalendar className="w-5 h-5 mr-3 text-yellow-400" />
-              <span>{new Date(event.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              <span>
+                {new Date(event.date).toLocaleDateString('fr-FR', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </span>
             </div>
             <div className="flex items-center text-gray-600">
               <FaClock className="w-5 h-5 mr-3 text-yellow-400" />
@@ -106,7 +122,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
             </div>
           </div>
 
-          {/* Statistiques */}
+          {/* Stats */}
           <div className="space-y-4">
             <div className="flex items-center text-gray-600">
               <FaUsers className="w-5 h-5 mr-3 text-yellow-400" />
@@ -116,11 +132,8 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
               <FaMoneyBillWave className="w-5 h-5 mr-3 text-yellow-400" />
               <span>{event.price === 0 ? 'Gratuit' : `${event.price}€`}</span>
             </div>
-            <div className="flex items-center text-gray-600">
-              <FaEuroSign className="mr-2 text-[#fbe216]" />
-              <span>{event.price}</span>
-            </div>
           </div>
+        </div>
 
         {/* Description */}
         <div className="bg-white rounded-lg p-6 mb-8">
@@ -136,14 +149,14 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
           </div>
         </div>
 
-        {/* Bouton d'inscription */}
+        {/* Bouton inscription */}
         <div className="flex justify-center">
           <button
             className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-lg hover:bg-yellow-500 transition-colors text-lg font-medium"
             disabled={event.status !== 'published' || confirmedParticipants >= event.maxCapacity}
             onClick={() => console.log("TODO: implémenter l'inscription")}
           >
-            {event.status !== 'published' 
+            {event.status !== 'published'
               ? 'Inscriptions non ouvertes'
               : confirmedParticipants >= event.maxCapacity
               ? 'Événement complet'
