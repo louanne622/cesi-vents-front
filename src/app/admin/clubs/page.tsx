@@ -137,7 +137,9 @@ export default function AdminClubsPage() {
                       <div className="text-sm text-gray-900">
                         {club.category === 'culture' ? 'Culture' :
                          club.category === 'sport' ? 'Sport' :
-                         club.category === 'tech' ? 'Technologie' : 'Social'}
+                         club.category === 'tech' ? 'Technologie' :
+                         club.category === 'social' ? 'Social' :
+                         'Autre'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

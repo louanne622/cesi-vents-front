@@ -211,19 +211,19 @@ export default function CreateClubPage() {
                 Campus
               </label>
               <select
-                id="campus"
                 name="campus"
                 value={formatData.campus}
                 onChange={handleChange}
                 className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
               >
-                <option value="">Sélectionner un campus</option>
                 <option value="Lille">Lille</option>
                 <option value="Paris">Paris</option>
                 <option value="Arras">Arras</option>
-
+                <option value="Rouen">Rouen</option>
               </select>
             </div>
+
+            
 
             {/* Image du club */}
             <div>

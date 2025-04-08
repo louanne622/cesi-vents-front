@@ -35,9 +35,12 @@ export const getAllClubs = createAsyncThunk("clubs/getAllClubs", async (_: void,
 // Get club by id
 export const getClubById = createAsyncThunk("clubs/getClubById", async (id: string, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
     try {
+        console.log('Fetching club with id:', id);
         const response = await axiosInstance.get(`/clubs/${id}`);
+        console.log('Club data received:', response.data);
         return response.data;
     } catch (error: any) {
+        console.error('Error fetching club:', error);
         return rejectWithValue(error.response?.data?.message || "Une erreur est survenue lors de la récupération du club");
     }
 });
@@ -95,13 +98,16 @@ const clubSlice = createSlice({
                 state.error = action.payload as string;
             })
             .addCase(getClubById.pending, (state) => {
+                console.log('getClubById pending');
                 state.loading = true;
             })
             .addCase(getClubById.fulfilled, (state, action) => {
+                console.log('getClubById fulfilled:', action.payload);
                 state.loading = false;
                 state.currentClub = action.payload;
             })
             .addCase(getClubById.rejected, (state, action) => {
+                console.log('getClubById rejected:', action.payload);
                 state.loading = false;
                 state.error = action.payload as string;
             });
