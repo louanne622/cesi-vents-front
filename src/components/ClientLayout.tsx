@@ -6,14 +6,16 @@ import { AppDispatch, RootState } from '../redux/store';
 import Navbar from '../app/components/Navbar';
 import { getRefreshToken } from '../utils/cookieService';
 import { useRouter, usePathname } from 'next/navigation';
+import { useAppSelector } from '../redux/hooks';
+import Toast from '@/app/components/Toast';
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const pathname = usePathname();
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const { token, error: authError } = useAppSelector((state) => state.auth);
   const isLoading = useSelector((state: RootState) => state.auth.isLoading);
-  const error = useSelector((state: RootState) => state.auth.error);
+  const error = useSelector((state: RootState) => state.auth.error );
 
   // Vérification de l'authentification au chargement
   useEffect(() => {
@@ -31,16 +33,16 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
       const protectedRoutes = ['/profil', '/settings'];
       
       // Si l'utilisateur n'est pas authentifié et qu'il essaie d'accéder à une page protégée
-      if (!isLoading && !isAuthenticated && !error && protectedRoutes.includes(pathname)) {
+      if (!token && !isLoading && !error && protectedRoutes.includes(pathname)) {
         router.push('/login');
       }
       
       // Si l'utilisateur est authentifié et qu'il est sur la page de connexion
-      if (!isLoading && isAuthenticated && pathname === '/login') {
+      if (!isLoading && token && pathname === '/login') {
         router.push('/');
       }
     }
-  }, [pathname, isLoading, isAuthenticated, error, router]);
+  }, [pathname, isLoading, token, error, router]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">
@@ -49,9 +51,17 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   }
 
   if (error) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="text-red-500">{error}</div>
-    </div>;
+    return (
+      <>
+        <Navbar />
+        <main className="md:pl-64 pb-16 md:pb-8" style={{ paddingBottom: '0px' }}>
+          <div>
+            {children}
+          <Toast message={error} type="error" duration={5000} />
+          </div>
+        </main>
+      </>
+    );
   }
 
   return (

@@ -5,16 +5,18 @@ import { usePathname, useRouter } from "next/navigation";
 import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaBell, FaCog, FaSignOutAlt } from "react-icons/fa";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { logout } from "@/redux/features/authSlice";
+import { clearAuth } from "@/redux/features/authSlice";
+import { clearTokens } from "@/utils/cookieService";
+
 
 const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector((state) => state.auth.token !== null);
-
+  const { token, error: authError } = useAppSelector((state) => state.auth);
   const handleLogout = () => {
-    dispatch(logout());
+    clearTokens();
+    dispatch(clearAuth());
     router.push('/login');
   };
 
@@ -120,22 +122,22 @@ const Navbar = () => {
 
         {/* Section connexion/déconnexion */}
         <div className="p-4 border-t border-gray-200">
-          {isAuthenticated ? (
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
-            >
-              <FaSignOutAlt className="h-5 w-5" />
-              <span className="font-medium">Déconnexion</span>
-            </button>
-          ) : (
-            <Link
-              href="/login"
-              className="flex items-center justify-center space-x-2 px-4 py-3 bg-[#fbe216] text-gray-900 rounded-lg hover:bg-[#e6cf14] transition-colors duration-200"
+          {token ? (
+            <button 
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
+          >
+            <FaSignOutAlt className="h-5 w-5" />
+            <span className="font-medium">Déconnexion</span>
+          </button>
+          ) : (  
+            <Link 
+            href="/login" 
+              className="flex items-center justify-center space-x-2 px-4 py-3 bg-[#fbe216] text-gray-900 rounded-lg hover:bg-[#e6cf14] transition-colors duration-200 w-full"
             >
               <FaUser className="h-5 w-5" />
-              <span className="font-medium">Connexion</span>
-            </Link>
+            <span className="font-medium">Connexion</span>
+          </Link>
           )}
         </div>
       </aside>

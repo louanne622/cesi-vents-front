@@ -6,10 +6,12 @@ import Image from 'next/image';
 import { FaUser, FaCamera } from 'react-icons/fa';
 import { getProfile } from '@/redux/features/authSlice';
 import axiosInstance from '@/utils/axiosConfig';
+import Toast from './Toast';
 
 export default function ProfilePictureUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
+  const [showToast, setShowToast] = useState(false);
   const token = useAppSelector((state) => state.auth.token);
   const profile = useAppSelector((state) => state.auth.profile);
   const dispatch = useAppDispatch();
@@ -20,6 +22,7 @@ export default function ProfilePictureUpload() {
 
     setIsUploading(true);
     setError('');
+    setShowToast(false);
 
     try {
       if (!token) {
@@ -73,6 +76,7 @@ export default function ProfilePictureUpload() {
         error.message || 
         'Erreur lors du téléchargement de l\'image'
       );
+      setShowToast(true);
     } finally {
       setIsUploading(false);
     }
@@ -109,9 +113,9 @@ export default function ProfilePictureUpload() {
         {isUploading ? 'Upload en cours...' : 'Cliquez pour changer la photo'}
       </p>
 
-      {/* Message d'erreur */}
-      {error && (
-        <p className="text-red-500 text-sm mt-2">{error}</p>
+      {/* Toast d'erreur */}
+      {showToast && error && (
+        <Toast message={error} type="error" duration={5000} />
       )}
     </div>
   );
