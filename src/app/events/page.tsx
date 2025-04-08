@@ -10,10 +10,13 @@ import { FaSearch } from 'react-icons/fa';
 // Données de démonstration (à remplacer par un appel API)
 const eventsListData = [
   {
-    id: "1",
+    id: 1,
     title: "Soirée d'intégration CESI",
     description: "Rejoignez-nous pour une soirée exceptionnelle pour accueillir les nouveaux étudiants du CESI. Au programme : animations, musique et surprises !",
-    date: "2024-09-15",
+    date: {
+      day: "30",
+      month: "Septembre"
+    },
     time: "19:00",
     location: "Campus CESI - Hall Principal",
     image: "/img/lan.jpg",
