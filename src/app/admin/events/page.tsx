@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { FaCalendarAlt, FaSearch, FaFilter, FaPlus } from 'react-icons/fa';
-import Button from '../../components/ui/Button';
+import Button from '@/app/components/ui/Button';
 
 // Données de démonstration (à remplacer par des appels API)
 const mockEvents = [

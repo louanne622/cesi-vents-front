@@ -2,25 +2,30 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { IoLocationSharp } from 'react-icons/io5';
-import { IoTimeOutline } from 'react-icons/io5';
-import Date from './ui/Date';
-import Button from './ui/Button';
 import { useRouter } from 'next/navigation';
+import { FaCalendarAlt, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 
 interface EventCardProps {
-  id: string;
-  title?: string;
-  imageUrl?: string;
-  place?: string;
-  schedule?: string;
-  date?: {
+  id: number;
+  title: string;
+  imageUrl: string;
+  place: string;
+  schedule: string;
+  date: {
     day: string;
     month: string;
   };
 }
 
-const EventCard: React.FC<EventCardProps> = ({ id, title, imageUrl, place, schedule, date }) => {
+const EventCard: React.FC<EventCardProps> = ({
+  id,
+  title,
+  imageUrl,
+  place,
+  schedule,
+  date,
+}) => {
+
   const router = useRouter();
 
   const handleClick = () => {
@@ -29,65 +34,37 @@ const EventCard: React.FC<EventCardProps> = ({ id, title, imageUrl, place, sched
 
   return (
     <div 
-      className="relative w-full max-w-xs bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300"
+      className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
       onClick={handleClick}
     >
-      {/* Container with background - increased height */}
-      <div className="relative w-full" style={{ paddingTop: '40%' }}>
-        {/* Image container */}
-        <div className="absolute inset-0">
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={title || 'Event image'}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-500" />
-          )}
-        </div>
+      {/* Image de l'événement */}
+      <div className="relative h-48">
+        <Image
+          src={imageUrl}
+          alt={title}
+          fill
+          className="object-cover"
+        />
       </div>
 
-      {/* Date component positioned at the bottom of the image */}
-      {date && (
-        <div className="absolute top-[calc(40%-6px)] left-4 z-10">
-          <Date date={date} />
-        </div>
-      )}
-      
-      {/* Content section */}
-      <div className="pt-8 px-4 pb-4 flex flex-col relative min-h-[120px]">
-        {title && (
-          <h3 className="text-gray-800 text-lg font-semibold">{title}</h3>
-        )}
-        {place && (
-          <div className="flex items-center gap-2 text-gray-500 text-sm mt-1">
-            <IoLocationSharp className="text-purple-800" />
-            <span>{place}</span>
+      {/* Contenu */}
+      <div className="p-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+        
+        {/* Métadonnées */}
+        <div className="space-y-2">
+          <div className="flex items-center text-gray-600">
+            <FaCalendarAlt className="mr-2 text-[#fbe216]" />
+            <span>{date.day} {date.month}</span>
           </div>
-        )}
-        {schedule && (
-          <div className="flex items-center gap-2 text-gray-500 text-sm mt-1">
-            <IoTimeOutline className="text-purple-800" />
+          <div className="flex items-center text-gray-600">
+            <FaClock className="mr-2 text-[#fbe216]" />
             <span>{schedule}</span>
           </div>
-        )}
-
-        {/* Space between content and button */}
-        <div className="mt-6"></div>
-
-        {/* Button component */}
-        <div className="absolute bottom-4 right-4">
-          <Button 
-            text="Voir plus" 
-            color="primary" 
-            size="sm" 
-            onClick={() => {
-              router.push(`/events/${id}`);
-            }} 
-          />
+          <div className="flex items-center text-gray-600">
+            <FaMapMarkerAlt className="mr-2 text-[#fbe216]" />
+            <span className="truncate">{place}</span>
+          </div>
         </div>
       </div>
     </div>
