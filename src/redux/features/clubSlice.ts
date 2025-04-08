@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosConfig";
 
 interface Club {
-    id: string;
+    _id: string;
     name: string;
     description: string;
     logo: {
@@ -10,6 +10,8 @@ interface Club {
         alt: string;
     };
     email: string;
+    campus: string;
+    category: string;
 }
 
 interface ClubState {
@@ -19,10 +21,11 @@ interface ClubState {
     error: string | null;
 }
 
+
 // Get all clubs
-export const getAllClubs = createAsyncThunk("club/getAllClubs", async (_: void, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
+export const getAllClubs = createAsyncThunk("clubs/getAllClubs", async (_: void, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
     try {
-        const response = await axiosInstance.get("/club/list");
+        const response = await axiosInstance.get("/clubs/list");
         return response.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Une erreur est survenue lors de la récupération des clubs");
@@ -30,9 +33,9 @@ export const getAllClubs = createAsyncThunk("club/getAllClubs", async (_: void, 
 });
 
 // Get club by id
-export const getClubById = createAsyncThunk("club/getClubById", async (id: string, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
+export const getClubById = createAsyncThunk("clubs/getClubById", async (id: string, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
     try {
-        const response = await axiosInstance.get(`/club/${id}`);
+        const response = await axiosInstance.get(`/clubs/${id}`);
         return response.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Une erreur est survenue lors de la récupération du club");
@@ -40,9 +43,9 @@ export const getClubById = createAsyncThunk("club/getClubById", async (id: strin
 });
 
 // Create club
-export const createClub = createAsyncThunk("club/createClub", async(clubData: {name: string, description: string, logo: {url: string, alt: string}, email: string}, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
+export const createClub = createAsyncThunk("clubs/createClub", async(clubData: {name: string, description: string, logo: {url: string, alt: string}, email: string, category: string, campus: string}, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
     try {
-        const response = await axiosInstance.post("/club/list", clubData);
+        const response = await axiosInstance.post("/clubs/create", clubData);
         return response.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Une erreur est survenue lors de la création du club");
@@ -50,9 +53,9 @@ export const createClub = createAsyncThunk("club/createClub", async(clubData: {n
 });
 
 // Delete club
-export const deleteClub = createAsyncThunk("club/deleteClub", async (id: string, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
+export const deleteClub = createAsyncThunk("clubs/deleteClub", async (id: string, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
     try {
-        const response = await axiosInstance.delete(`/club/${id}`);
+        const response = await axiosInstance.delete(`/clubs/${id}`);
         return response.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Une erreur est survenue lors de la suppression du club");
@@ -60,9 +63,9 @@ export const deleteClub = createAsyncThunk("club/deleteClub", async (id: string,
 });
 
 // Update club
-export const updateClub = createAsyncThunk("club/updateClub", async (clubData: {id: string, name: string, description: string, logo: {url: string, alt: string}, email: string}, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
+export const updateClub = createAsyncThunk("clubs/updateClub", async (clubData: {id: string, name: string, description: string, logo: {url: string, alt: string}, email: string, campus:string, category:string}, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
     try {
-        const response = await axiosInstance.put(`/club/${clubData.id}`, clubData);
+        const response = await axiosInstance.put(`/clubs/${clubData.id}`, clubData);
         return response.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Une erreur est survenue lors de la mise à jour du club");
@@ -88,6 +91,17 @@ const clubSlice = createSlice({
                 state.clubs = action.payload;
             })
             .addCase(getAllClubs.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+            .addCase(getClubById.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(getClubById.fulfilled, (state, action) => {
+                state.loading = false;
+                state.currentClub = action.payload;
+            })
+            .addCase(getClubById.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             });

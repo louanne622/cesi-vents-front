@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaImage, FaUsers, FaMapMarkerAlt, FaCalendarAlt, FaUser } from 'react-icons/fa';
 import Button from '../../../components/ui/Button';
@@ -8,40 +8,78 @@ import { createClub } from '@/redux/features/clubSlice';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { toast } from 'react-hot-toast';
+import { useAppDispatch,useAppSelector } from '@/redux/hooks';
+import Toast from '@/app/components/Toast';
 
 export default function CreateClubPage() {
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const MAX_IMAGE_SIZE = 50 * 1024; // 50KB en bytes
+  
+  const [formatData, setFormat] = useState({
     name: '',
     description: '',
-    category: 'culture',
-    campus: 'Lille',
-    image: '',
-    leaderEmail: '',
+    email: '',
+    logo: { url: '', alt: '' },
+    category: '',
+    campus: ''
   });
+
+  const {currentClub} = useAppSelector((state) => state.club);
+
+  // Initialize currentClub with default values if not set
+  useEffect(() => {
+    if (!currentClub) {
+      
+    } else {
+      setFormat({
+        name: currentClub.name,
+        description: currentClub.description,
+        email: currentClub.email,
+        logo: currentClub.logo,
+        category: currentClub.category,
+        campus: currentClub.campus
+      });
+    }
+  }, [dispatch, currentClub]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const clubData = {
-        name: formData.name,
-        description: formData.description,
-        logo: {
-          url: formData.image,
-          alt: `${formData.name} logo`
-        },
-        email: formData.leaderEmail
-      };
+      console.log('Début de la soumission du formulaire');
+      console.log('formatData:', formatData);
 
-      await dispatch(createClub(clubData)).unwrap();
-      toast.success('Club créé avec succès !');
+      // Vérification de la taille de l'image
+      if (formatData.logo.url) {
+        const base64String = formatData.logo.url.split(',')[1];
+        const fileSize = Math.ceil((base64String.length * 3) / 4);
+        if (fileSize > MAX_IMAGE_SIZE) {
+          <Toast message={`L'image ne doit pas dépasser ${MAX_IMAGE_SIZE / 1024}KB`} type="error" duration={5000} />
+        }
+      }
+
+      const clubData = {
+        name: formatData.name,
+        description: formatData.description,
+        email: formatData.email,
+        logo: {
+          url: formatData.logo.url,
+          alt: formatData.logo.alt || formatData.name
+        },
+        category: formatData.category,
+        campus: formatData.campus
+      };
+      console.log('Données du club à créer:', clubData);
+
+      const result = await dispatch(createClub(clubData)).unwrap();
+      console.log('Résultat de la création:', result);
+      <Toast message="Club créé avec succès !" type="success" duration={5000} />
       router.push('/admin/clubs');
     } catch (error: any) {
-      toast.error(error.message || 'Une erreur est survenue lors de la création du club');
+      console.error('Erreur lors de la création:', error);
     } finally {
       setIsLoading(false);
     }
@@ -49,10 +87,30 @@ export default function CreateClubPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormat(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Vérification de la taille du fichier
+      if (file.size > MAX_IMAGE_SIZE) {
+        <Toast message={`L'image ne doit pas dépasser ${MAX_IMAGE_SIZE / 1024}KB`} type="error" duration={5000} />
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormat(prev => ({
+          ...prev,
+          logo: {
+            url: reader.result as string,
+            alt: file.name
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -83,10 +141,9 @@ export default function CreateClubPage() {
                 type="text"
                 id="name"
                 name="name"
-                value={formData.name}
+                value={formatData.name || ''}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
                 placeholder="Ex: Club Photo"
               />
             </div>
@@ -99,19 +156,18 @@ export default function CreateClubPage() {
               <textarea
                 id="description"
                 name="description"
-                value={formData.description}
+                value={formatData.description || ''}
                 onChange={handleChange}
-                required
                 rows={4}
-                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
                 placeholder="Décrivez les activités et objectifs du club..."
               />
             </div>
 
-            {/* Chef de club */}
+            {/* Email du club */}
             <div>
-              <label htmlFor="leaderEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                Responsable de club
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email du club
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -119,18 +175,14 @@ export default function CreateClubPage() {
                 </div>
                 <input
                   type="email"
-                  id="leaderEmail"
-                  name="leaderEmail"
-                  value={formData.leaderEmail}
+                  id="email"
+                  name="email"
+                  value={formatData.email || ''}
                   onChange={handleChange}
-                  required
-                  className="w-full pl-10 px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                  className="w-full pl-10 px-4 py-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
                   placeholder="email@cesi.fr"
                 />
               </div>
-              <p className="mt-1 text-sm text-gray-500">
-                L'étudiant recevra une notification pour accepter son rôle de Responsable de club
-              </p>
             </div>
 
             {/* Catégorie */}
@@ -141,11 +193,11 @@ export default function CreateClubPage() {
               <select
                 id="category"
                 name="category"
-                value={formData.category}
+                value={formatData.category}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
               >
+                <option value="">Sélectionner une catégorie</option>
                 <option value="culture">Culture</option>
                 <option value="sport">Sport</option>
                 <option value="tech">Technologie</option>
@@ -161,55 +213,42 @@ export default function CreateClubPage() {
               <select
                 id="campus"
                 name="campus"
-                value={formData.campus}
+                value={formatData.campus}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
               >
+                <option value="">Sélectionner un campus</option>
                 <option value="Lille">Lille</option>
                 <option value="Paris">Paris</option>
                 <option value="Arras">Arras</option>
+
               </select>
             </div>
 
             {/* Image du club */}
             <div>
-              <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="logo" className="block text-sm font-medium text-gray-700 mb-1">
                 Image du club
               </label>
               <div className="flex items-center space-x-4">
                 <input
                   type="file"
-                  id="image"
-                  name="image"
+                  id="logo"
                   accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setFormData(prev => ({
-                          ...prev,
-                          image: reader.result as string
-                        }));
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
+                  onChange={handleImageChange}
                   className="hidden"
                 />
                 <label
-                  htmlFor="image"
-                  className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 text-gray-900"
+                  htmlFor="logo"
+                  className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700"
                 >
-                  <FaImage className="h-5 w-5 text-gray-500 mr-2" />
-                  <span>Choisir une image</span>
+                  Choisir une image
                 </label>
-                {formData.image && (
+                {formatData.logo.url && (
                   <div className="relative h-20 w-20">
                     <img
-                      src={formData.image}
-                      alt="Preview"
+                      src={formatData.logo.url}
+                      alt={formatData.logo.alt}
                       className="object-cover rounded-lg"
                     />
                   </div>
