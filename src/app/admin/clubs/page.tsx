@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import FilterBar from '@/components/ui/FilterBar';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { getAllClubs, getClubById, deleteClub } from '@/redux/features/clubSlice';
+import { getAllClubs, getClubByName, deleteClub } from '@/redux/features/clubSlice';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
@@ -29,10 +29,10 @@ export default function AdminClubsPage() {
     }
   }, [error]);
 
-  const handleViewClub = async (clubId: string) => {
+  const handleViewClub = async (club: any) => {
     try {
-      await dispatch(getClubById(clubId));
-      router.push(`/admin/clubs/${clubId}/view`);
+      await dispatch(getClubByName(club.name));
+      router.push(`/admin/clubs/${club.name}/view`);
     } catch (error) {
       toast.error('Erreur lors de la récupération des détails du club');
     }
@@ -45,13 +45,22 @@ export default function AdminClubsPage() {
 
   const handleDeleteConfirm = async () => {
     if (!clubToDelete) return;
-    
+
     try {
-      console.log('Début de la suppression du club:', clubToDelete);
-      await dispatch(deleteClub(clubToDelete)).unwrap();
+      // Dispatch deleteClub and handle the rejection
+      await dispatch(deleteClub(clubToDelete))
+        .unwrap()
+        .catch((error: any) => {
+          throw new Error(error.message || 'Erreur lors de la suppression du club');
+        });
       
       // Recharger la liste des clubs
-      await dispatch(getAllClubs()).unwrap();
+      await dispatch(getAllClubs())
+        .unwrap()
+        .catch((error: any) => {
+          console.error('Erreur lors du rechargement des clubs:', error);
+          throw new Error(error.message || 'Erreur lors du rechargement des clubs');
+        });
       
       toast.success('Club supprimé avec succès');
       setIsDeleteModalOpen(false);
@@ -97,6 +106,21 @@ export default function AdminClubsPage() {
       </div>
     );
   }
+
+  //si clique sur supprimer
+  if (isDeleteModalOpen) {
+    return (
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Supprimer le club"
+        message="Êtes-vous sûr de vouloir supprimer ce club ? Cette action est irréversible."
+        confirmText="Supprimer"
+      />
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -160,7 +184,11 @@ export default function AdminClubsPage() {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{club.name}</div>
-                          <div className="text-sm text-gray-500">{club.description}</div>
+                          <div className="text-sm text-gray-500">
+                            {club.description.length > 50 
+                              ? `${club.description.substring(0, 50)}...` 
+                              : club.description}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -186,7 +214,7 @@ export default function AdminClubsPage() {
                         variant="outline"
                         size="sm"
                         icon={<FaEye />}
-                        onClick={() => handleViewClub(club._id)}
+                        onClick={() => handleViewClub(club)}
                         className="flex items-center justify-center w-8 h-8"
                       />
                       <Button
@@ -215,15 +243,6 @@ export default function AdminClubsPage() {
           </div>
         </div>
       </div>
-
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        title="Supprimer le club"
-        message="Êtes-vous sûr de vouloir supprimer ce club ? Cette action est irréversible."
-        confirmText="Supprimer"
-      />
     </div>
   );
 } 

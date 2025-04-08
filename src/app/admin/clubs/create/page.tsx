@@ -74,6 +74,11 @@ export default function CreateClubPage() {
       };
       console.log('Données du club à créer:', clubData);
 
+      if (!clubData.category || !clubData.campus) {
+        <Toast message="Champ(s) manquant(s)" type="error" duration={5000} />
+        return;
+      }
+
       const result = await dispatch(createClub(clubData)).unwrap();
       console.log('Résultat de la création:', result);
       <Toast message="Club créé avec succès !" type="success" duration={5000} />
@@ -216,6 +221,7 @@ export default function CreateClubPage() {
                 onChange={handleChange}
                 className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
               >
+                <option value="">Sélectionner un campus</option>
                 <option value="Lille">Lille</option>
                 <option value="Paris">Paris</option>
                 <option value="Arras">Arras</option>
