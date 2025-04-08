@@ -54,33 +54,6 @@ const featuredClubs = [
   }
 ];
 
-const bdeFeaturedEvents = [
-  {
-    id: 4,
-    title: "Gala annuel CESI",
-    place: "Hôtel Le Grand Palace",
-    schedule: "19:30",
-    date: { day: "14", month: "Février" },
-    imageUrl: "/img/lan.jpg"
-  },
-  {
-    id: 5,
-    title: "Soirée Réseautage Entreprises",
-    place: "Campus CESI - Espace Carrière",
-    schedule: "18:30",
-    date: { day: "26", month: "Janvier" },
-    imageUrl: "/img/lan.jpg"
-  },
-  {
-    id: 6,
-    title: "Forum des Associations",
-    place: "Campus CESI - Hall Principal",
-    schedule: "12:00",
-    date: { day: "21", month: "Mars" },
-    imageUrl: "/img/lan.jpg"
-  }
-];
-
 export default function Home() {
   const router = useRouter();
 
@@ -113,7 +86,7 @@ export default function Home() {
         </section>
 
         {/* Section Clubs mis en avant */}
-        <section className="mb-16">
+        <section>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Clubs à découvrir</h2>
             <button 
@@ -140,30 +113,6 @@ export default function Home() {
                   </div>
                 </div>
                 <p className="text-gray-600">{club.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Section Événements mis en avant par le BDE */}
-        <section>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Mis en avant par le BDE</h2>
-            <button 
-              onClick={() => router.push('/events')}
-              className="text-sm text-[#fbe216] hover:underline"
-            >
-              Voir tous les événements
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {bdeFeaturedEvents.map((event) => (
-              <div 
-                key={event.id}
-                onClick={() => router.push(`/events/${event.id}`)}
-                className="cursor-pointer hover:scale-105 transition-transform duration-200"
-              >
-                <EventCard {...event} />
               </div>
             ))}
           </div>
