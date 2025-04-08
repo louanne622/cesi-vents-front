@@ -8,6 +8,7 @@ import Button from '../components/ui/Button';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { register } from '@/redux/features/authSlice';
+import Toast from '../components/Toast';
 
 const Register = () => {
   const dispatch = useAppDispatch();
@@ -59,12 +60,6 @@ const Register = () => {
           <div className="w-full bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Inscription</h2>
             
-            {(error || formError) && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-                {error || formError}
-              </div>
-            )}
-            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -80,6 +75,8 @@ const Register = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+
+              {error && <Toast message={error} type="error" duration={5000} />}
 
               {/* Prénom */}
               <div>
@@ -230,6 +227,8 @@ const Register = () => {
       </div>
     </div>
   );
+
+  
 };
 
 export default Register;

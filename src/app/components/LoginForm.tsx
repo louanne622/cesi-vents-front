@@ -7,6 +7,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { login } from '@/redux/features/authSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { useRouter } from 'next/navigation';
+import Toast from './Toast';
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,8 +15,9 @@ const LoginForm = () => {
   const [password, setPassword] = useState('');
   const dispatch = useAppDispatch();
   const router = useRouter();
-  
-  const { isLoading, error, token } = useAppSelector((state) => state.auth);
+  const { token } = useAppSelector((state) => state.auth);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -23,10 +25,19 @@ const LoginForm = () => {
     }
   }, [token, router]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', { email, password });
-    await dispatch(login({ email, password }) as any);
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await dispatch(login({ email, password })).unwrap();
+      router.push('/');
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la connexion');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -99,15 +110,11 @@ const LoginForm = () => {
           </Link>
         </div>
 
-        {error && (
-          <div className="text-red-500 text-sm text-center">{error}</div>
-        )}
         <div className="mt-6">
           <Button
             text={isLoading ? "Connexion..." : "Se connecter"}
             color="primary"
             type="submit"
-            onClick={() => {}}
             fullWidth
             disabled={isLoading}
           />
@@ -120,8 +127,13 @@ const LoginForm = () => {
           </Link>
         </div>
       </form>
+      
+      {/* Toast d'erreur */}
+      {error && (
+        <Toast message={error} type="error" duration={5000} />
+      )}
     </div>
   );
 };
 
-export default LoginForm; 
+export default LoginForm;
