@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { FaUsers, FaPlus, FaEye } from 'react-icons/fa';
+import { FaUsers, FaPlus, FaEye, FaTrash, FaPencilAlt } from 'react-icons/fa';
 import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
 import FilterBar from '@/components/ui/FilterBar';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { getAllClubs, getClubById } from '@/redux/features/clubSlice';
+import { getAllClubs, getClubById, deleteClub } from '@/redux/features/clubSlice';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
@@ -15,6 +16,8 @@ export default function AdminClubsPage() {
   const { clubs, loading, error } = useAppSelector((state) => state.club);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [clubToDelete, setClubToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(getAllClubs());
@@ -35,6 +38,35 @@ export default function AdminClubsPage() {
     }
   };
 
+  const handleDeleteClick = (clubId: string) => {
+    setClubToDelete(clubId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!clubToDelete) return;
+    
+    try {
+      console.log('Début de la suppression du club:', clubToDelete);
+      await dispatch(deleteClub(clubToDelete)).unwrap();
+      
+      // Recharger la liste des clubs
+      await dispatch(getAllClubs()).unwrap();
+      
+      toast.success('Club supprimé avec succès');
+      setIsDeleteModalOpen(false);
+      setClubToDelete(null);
+    } catch (error: any) {
+      console.error('Erreur lors de la suppression:', error);
+      toast.error(error.message || 'Erreur lors de la suppression du club');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setClubToDelete(null);
+  };
+
   const filteredClubs = clubs.filter(club => {
     const matchesSearch = club.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || club.category === selectedCategory;
@@ -46,7 +78,6 @@ export default function AdminClubsPage() {
       label: 'Toutes les catégories',
       value: selectedCategory,
       options: [
-        { value: 'all', label: 'Toutes' },
         { value: 'culture', label: 'Culture' },
         { value: 'sport', label: 'Sport' },
         { value: 'tech', label: 'Technologie' },
@@ -150,17 +181,31 @@ export default function AdminClubsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                       <Button
-                        text="Voir"
+                        text=""
                         color="primary"
                         variant="outline"
+                        size="sm"
                         icon={<FaEye />}
                         onClick={() => handleViewClub(club._id)}
+                        className="flex items-center justify-center w-8 h-8"
                       />
                       <Button
-                        text="Modifier"
+                        text=""
+                        color="danger"
+                        variant="outline"
+                        size="sm"
+                        icon={<FaTrash />}
+                        onClick={() => handleDeleteClick(club._id)}
+                        className="flex items-center justify-center w-8 h-8"
+                      />
+                      <Button
+                        text=""
                         color="secondary"
                         variant="outline"
+                        size="sm"
+                        icon={<FaPencilAlt />}
                         onClick={() => window.location.href = `/admin/clubs/${club._id}/edit`}
+                        className="flex items-center justify-center w-8 h-8"
                       />
                     </td>
                   </tr>
@@ -170,6 +215,15 @@ export default function AdminClubsPage() {
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Supprimer le club"
+        message="Êtes-vous sûr de vouloir supprimer ce club ? Cette action est irréversible."
+        confirmText="Supprimer"
+      />
     </div>
   );
 } 

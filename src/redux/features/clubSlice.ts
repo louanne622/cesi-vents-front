@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosConfig";
 
-interface Club {
+export interface Club {
     _id: string;
     name: string;
     description: string;
@@ -66,9 +66,9 @@ export const deleteClub = createAsyncThunk("clubs/deleteClub", async (id: string
 });
 
 // Update club
-export const updateClub = createAsyncThunk("clubs/updateClub", async (clubData: {id: string, name: string, description: string, logo: {url: string, alt: string}, email: string, campus:string, category:string}, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
+export const updateClub = createAsyncThunk("clubs/updateClub", async ({ id, data }: { id: string, data: Omit<Club, '_id'> }, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
     try {
-        const response = await axiosInstance.put(`/clubs/${clubData.id}`, clubData);
+        const response = await axiosInstance.put(`/clubs/${id}`, data);
         return response.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Une erreur est survenue lors de la mise à jour du club");
@@ -110,6 +110,13 @@ const clubSlice = createSlice({
                 console.log('getClubById rejected:', action.payload);
                 state.loading = false;
                 state.error = action.payload as string;
+            })
+            .addCase(deleteClub.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(deleteClub.fulfilled, (state, action) => {
+                state.loading = false;
+                state.clubs = state.clubs.filter(club => club._id !== action.meta.arg);
             });
     }
 });
