@@ -1,48 +1,76 @@
 "use client";
 
-import React, { useState } from 'react';
-import { FaUsers, FaPlus } from 'react-icons/fa';
-import Button from '@/app/components/ui/Button';
-import FilterBar from '@/app/components/ui/FilterBar';
-
-// Données de démonstration (à remplacer par des appels API)
-const mockClubs = [
-  {
-    id: 1,
-    name: 'Club Photo',
-    category: 'culture',
-    members: 45,
-    campus: 'Lille',
-    status: 'active',
-  },
-  {
-    id: 2,
-    name: 'Club Robotique',
-    category: 'tech',
-    members: 32,
-    campus: 'Paris',
-    status: 'active',
-  },
-  {
-    id: 3,
-    name: 'Club Théâtre',
-    category: 'culture',
-    members: 28,
-    campus: 'Arras',
-    status: 'pending',
-  },
-];
+import React, { useEffect, useState } from 'react';
+import { FaUsers, FaPlus, FaEye, FaTrash, FaPencilAlt } from 'react-icons/fa';
+import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
+import FilterBar from '@/components/ui/FilterBar';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { getAllClubs, getClubById, deleteClub } from '@/redux/features/clubSlice';
+import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export default function AdminClubsPage() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { clubs, loading, error } = useAppSelector((state) => state.club);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [clubToDelete, setClubToDelete] = useState<string | null>(null);
 
-  const filteredClubs = mockClubs.filter(club => {
+  useEffect(() => {
+    dispatch(getAllClubs());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
+  const handleViewClub = async (clubId: string) => {
+    try {
+      await dispatch(getClubById(clubId));
+      router.push(`/admin/clubs/${clubId}/view`);
+    } catch (error) {
+      toast.error('Erreur lors de la récupération des détails du club');
+    }
+  };
+
+  const handleDeleteClick = (clubId: string) => {
+    setClubToDelete(clubId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!clubToDelete) return;
+    
+    try {
+      console.log('Début de la suppression du club:', clubToDelete);
+      await dispatch(deleteClub(clubToDelete)).unwrap();
+      
+      // Recharger la liste des clubs
+      await dispatch(getAllClubs()).unwrap();
+      
+      toast.success('Club supprimé avec succès');
+      setIsDeleteModalOpen(false);
+      setClubToDelete(null);
+    } catch (error: any) {
+      console.error('Erreur lors de la suppression:', error);
+      toast.error(error.message || 'Erreur lors de la suppression du club');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setClubToDelete(null);
+  };
+
+  const filteredClubs = clubs.filter(club => {
     const matchesSearch = club.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || club.category === selectedCategory;
-    const matchesStatus = selectedStatus === 'all' || club.status === selectedStatus;
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesCategory;
   });
 
   const filters = [
@@ -57,17 +85,18 @@ export default function AdminClubsPage() {
       ],
       onChange: setSelectedCategory,
     },
-    {
-      label: 'Tous les statuts',
-      value: selectedStatus,
-      options: [
-        { value: 'active', label: 'Actifs' },
-        { value: 'pending', label: 'En attente' },
-        { value: 'inactive', label: 'Inactifs' },
-      ],
-      onChange: setSelectedStatus,
-    },
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#fbe216] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement des clubs...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -106,10 +135,7 @@ export default function AdminClubsPage() {
                     Campus
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Membres
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
+                    Email
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -118,14 +144,23 @@ export default function AdminClubsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredClubs.map((club) => (
-                  <tr key={club.id} className="hover:bg-gray-50">
+                  <tr key={club._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
-                          <FaUsers className="h-10 w-10 text-[#fbe216]" />
+                          {club.logo?.url ? (
+                            <img
+                              src={club.logo.url}
+                              alt={club.logo.alt || club.name}
+                              className="h-10 w-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <FaUsers className="h-10 w-10 text-[#fbe216]" />
+                          )}
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{club.name}</div>
+                          <div className="text-sm text-gray-500">{club.description}</div>
                         </div>
                       </div>
                     </td>
@@ -133,32 +168,44 @@ export default function AdminClubsPage() {
                       <div className="text-sm text-gray-900">
                         {club.category === 'culture' ? 'Culture' :
                          club.category === 'sport' ? 'Sport' :
-                         club.category === 'tech' ? 'Technologie' : 'Social'}
+                         club.category === 'tech' ? 'Technologie' :
+                         club.category === 'social' ? 'Social' :
+                         'Autre'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{club.campus}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{club.members}</div>
+                      <div className="text-sm text-gray-900">{club.email}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        club.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : club.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {club.status === 'active' ? 'Actif' : club.status === 'pending' ? 'En attente' : 'Inactif'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                       <Button
-                        text="Modifier"
+                        text=""
+                        color="primary"
+                        variant="outline"
+                        size="sm"
+                        icon={<FaEye />}
+                        onClick={() => handleViewClub(club._id)}
+                        className="flex items-center justify-center w-8 h-8"
+                      />
+                      <Button
+                        text=""
+                        color="danger"
+                        variant="outline"
+                        size="sm"
+                        icon={<FaTrash />}
+                        onClick={() => handleDeleteClick(club._id)}
+                        className="flex items-center justify-center w-8 h-8"
+                      />
+                      <Button
+                        text=""
                         color="secondary"
                         variant="outline"
-                        onClick={() => window.location.href = `/admin/clubs/${club.id}/edit`}
+                        size="sm"
+                        icon={<FaPencilAlt />}
+                        onClick={() => window.location.href = `/admin/clubs/${club._id}/edit`}
+                        className="flex items-center justify-center w-8 h-8"
                       />
                     </td>
                   </tr>
@@ -168,6 +215,15 @@ export default function AdminClubsPage() {
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Supprimer le club"
+        message="Êtes-vous sûr de vouloir supprimer ce club ? Cette action est irréversible."
+        confirmText="Supprimer"
+      />
     </div>
   );
 } 

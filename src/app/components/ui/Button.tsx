@@ -65,12 +65,18 @@ export default function Button({
       className={`${baseStyles} ${colorStyles[color][variant]} ${sizeStyles[size]} ${fullWidth ? 'w-full' : ''} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       disabled={disabled}
     >
-      {icon && iconPosition === 'left' && (
-        <span className="mr-2">{icon}</span>
-      )}
-      {text}
-      {icon && iconPosition === 'right' && (
-        <span className="ml-2">{icon}</span>
+      {icon && !text ? (
+        <span className="flex items-center justify-center">{icon}</span>
+      ) : (
+        <>
+          {icon && iconPosition === 'left' && (
+            <span className="mr-2">{icon}</span>
+          )}
+          {text}
+          {icon && iconPosition === 'right' && (
+            <span className="ml-2">{icon}</span>
+          )}
+        </>
       )}
     </button>
   );

@@ -70,9 +70,6 @@ export default function ClubDetailsPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <ClubDetails
-      club={club}
-      onBack={() => router.push('/clubs')}
-    />
+    <>  </>
   );
 } 
