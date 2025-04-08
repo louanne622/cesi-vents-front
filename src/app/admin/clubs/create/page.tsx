@@ -132,6 +132,7 @@ export default function CreateClubPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Créer un nouveau club</h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nom du club */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -261,7 +262,9 @@ export default function CreateClubPage() {
               <Button
                 type="submit"
                 text={isLoading ? "Création en cours..." : "Créer le club"}
+                text={isLoading ? "Création en cours..." : "Créer le club"}
                 color="primary"
+                disabled={isLoading}
                 disabled={isLoading}
               />
               <Button
