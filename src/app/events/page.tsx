@@ -1,163 +1,176 @@
-"use client";  // Convertir en composant client pour utiliser des états
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/redux/store';
+import { fetchEvents } from '@/redux/features/eventSlice';
+
 import EventCard from '../components/Eventcard';
 import FilterBar from '@/app/components/ui/FilterBar';
 import SearchBar from '../components/events/SearchBar';
-import Button from '@/app/components/ui/Button';
-import { FaSearch } from 'react-icons/fa';
 
-// Données de démonstration (à remplacer par un appel API)
-const eventsListData = [
-  {
-    id: 1,
-    title: "Soirée d'intégration CESI",
-    description: "Rejoignez-nous pour une soirée exceptionnelle pour accueillir les nouveaux étudiants du CESI. Au programme : animations, musique et surprises !",
-    date: {
-      day: "30",
-      month: "Septembre"
-    },
-    time: "19:00",
-    location: "Campus CESI - Hall Principal",
-    image: "/img/lan.jpg",
-    category: "Social",
-    organizer: "BDE CESI",
-    price: "Gratuit",
-    currentParticipants: 120,
-    maxParticipants: 200
-  },
-  {
 
-    id: 2,
-    title: "Tournoi de Jeux Vidéo",
-    description: "Participez à notre tournoi de jeux vidéo ! Au programme : League of Legends, Valorant, et bien d'autres. Des lots à gagner !",
-    date: {
-      day: "22",
-      month: "Septembre"
-    },
-    time: "14:00",
-    location: "Salle Multimédia CESI",
-    image: "/img/lan.jpg",
-    category: "Gaming",
-    organizer: "Club Gaming CESI",
-    price: "5€",
-    participants: {
-      current: 45,
-      max: 50
-    }
-  },
-  {
-    id: 3,
-    title: "Atelier Développement Web",
-    description: "Apprenez les bases du développement web avec nos experts. HTML, CSS, JavaScript et plus encore !",
-    date: {
-      day: "30",
-      month: "Septembre"
-    },
-    time: "10:00",
-    location: "Salle Informatique CESI",
-    image: "/img/lan.jpg",
-    category: "Formation",
-    organizer: "Club Tech CESI",
-    price: "Gratuit",
-    participants: {
-      current: 15,
-      max: 30
-    }
-  }
-];
+
+interface Event {
+  category?: string;
+  _id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  maxCapacity: number;
+  price: number;
+  registrationDeadline: string;
+  status: 'draft' | 'published' | 'cancelled';
+  createdBy: string;
+  participants: Array<{
+    userId: string;
+    status: 'pending' | 'confirmed' | 'cancelled';
+    registrationDate: string;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function EventsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('Tous');
-  const [filteredEvents, setFilteredEvents] = useState(eventsListData);
-  const [showFilters, setShowFilters] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { events, status, error } = useSelector((state: RootState) => state.events);
 
-  // Catégories disponibles
-  const categories = ['Tous', ...Array.from(new Set(eventsListData.map(event => event.category)))];
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Tous");
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
 
-  // Fonction pour filtrer les événements
+  const categories = ["Tous", "Social", "Gaming", "Formation"];
+
   useEffect(() => {
-    let result = eventsListData;
-    
-    // Filtrer par catégorie
-    if (selectedCategory !== 'Tous') {
-      result = result.filter(event => event.category === selectedCategory);
+    dispatch(fetchEvents());
+  }, [dispatch]);
+
+  useEffect(() => {
+    let result = events;
+
+    if (selectedCategory !== "Tous") {
+      result = result.filter(event => event.category?.toLowerCase() === selectedCategory.toLowerCase());
     }
-    
-    // Filtrer par recherche
-    if (searchQuery.trim() !== '') {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(event => 
-        event.title.toLowerCase().includes(query) || 
-        event.description.toLowerCase().includes(query) ||
-        event.location.toLowerCase().includes(query)
+
+    if (searchTerm.trim() !== "") {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(event =>
+        event.title.toLowerCase().includes(term) ||
+        event.description.toLowerCase().includes(term) ||
+        event.location.toLowerCase().includes(term)
       );
     }
-    
+
     setFilteredEvents(result);
-  }, [searchQuery, selectedCategory]);
+  }, [events, selectedCategory, searchTerm]);
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("Tous");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* En-tête */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Événements</h1>
-          <p className="text-gray-600">Découvrez tous les événements à venir</p>
-        </div>
+      <div className="container mx-auto px-4 pt-8 pb-24">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Événements</h1>
+        <p className="text-gray-600 mb-8">Découvrez tous les événements à venir</p>
 
-        {/* Barre de recherche et filtres */}
-        <div className="mb-8 space-y-4">
-          {/* SearchBar */}
-          <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Rechercher un événement..."
-            onFilterClick={() => setShowFilters(!showFilters)}
-          />
-
-          {/* FilterBar (visible uniquement sur mobile ou quand showFilters est true) */}
-          <div className={`${showFilters ? 'block' : 'hidden md:block'}`}>
-            <FilterBar
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
-            />
+        {/* Barre de recherche */}
+        <div className="relative mb-6">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
+          <input
+            type="text"
+            placeholder="Rechercher un événement..."
+            className="pl-10 pr-4 py-2 w-full border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button className="absolute inset-y-0 right-0 px-3 flex items-center bg-yellow-400 text-gray-800 rounded-r-lg hover:bg-yellow-500 transition-colors">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+          </button>
         </div>
 
-        {/* Liste des événements */}
-        {filteredEvents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map(event => (
+        {/* Catégories */}
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedCategory === category
+                  ? 'bg-yellow-400 text-gray-900'
+                  : 'bg-white text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        {/* Contenu des événements */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {status === 'loading' && (
+            <div className="col-span-full text-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Chargement des événements...</p>
+            </div>
+          )}
+
+          {status === 'failed' && (
+            <div className="col-span-full text-center py-16">
+              <p className="text-red-500">Erreur : {error}</p>
+            </div>
+          )}
+
+          {status === 'succeeded' && filteredEvents.length === 0 && (
+            <div className="col-span-full text-center py-16">
+              <p className="text-gray-500 text-lg">Aucun événement ne correspond à vos critères.</p>
+              <button
+                onClick={handleResetFilters}
+                className="mt-4 px-4 py-2 bg-[#fbe216] text-gray-800 rounded-lg hover:bg-[#e6cf14] transition-colors"
+              >
+                Réinitialiser les filtres
+              </button>
+            </div>
+          )}
+
+          {status === 'succeeded' && filteredEvents.map((event) => (
+            <div key={event._id} className="w-full h-full">
               <EventCard
-                key={event.id}
-                id={event.id}
+                id={event._id}
                 title={event.title}
-                imageUrl={event.image}
+                imageUrl="/images/event-default.jpg"
                 place={event.location}
                 schedule={event.time}
-                date={event.date}
+                date={{
+                  day: new Date(event.date).getDate().toString(),
+                  month: new Date(event.date).toLocaleString('fr-FR', { month: 'long' }),
+                }}
+                price={event.price}
+                maxCapacity={event.maxCapacity}
+                currentParticipants={event.participants.filter(p => p.status === 'confirmed').length}
+                status={event.status}
+                deadline={new Date(event.registrationDeadline).toLocaleDateString('fr-FR')}
               />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">Aucun événement ne correspond à vos critères</p>
-            <Button
-              text="Réinitialiser les filtres"
-              color="secondary"
-              variant="outline"
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('Tous');
-              }}
-            />
+            </div>
+          ))}
+        </div>
 
+        {/* Nombre d'événements trouvés */}
+        {status === 'succeeded' && filteredEvents.length > 0 && (
+          <div className="mt-6 text-center text-sm text-gray-500">
+            {filteredEvents.length} événement{filteredEvents.length > 1 ? 's' : ''} trouvé{filteredEvents.length > 1 ? 's' : ''}
           </div>
         )}
       </div>
     </div>
   );
-} 
+}
