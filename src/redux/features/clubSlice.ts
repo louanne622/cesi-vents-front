@@ -62,13 +62,13 @@ export const getClubByName = createAsyncThunk("clubs/getClubByName", async (name
     }
 });
 
-// Create club
-export const createClub = createAsyncThunk("clubs/createClub", async(clubData: {name: string, description: string, logo: {url: string, alt: string}, email: string, category: string, campus: string}, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
+// Créer un club (admin seulement)
+export const createClub = createAsyncThunk("clubs/createClub", async (clubData: {name: string, description: string, logo: {url: string, alt: string}, email: string, category: string, campus: string}, { rejectWithValue }) => {
     try {
         const response = await axiosInstance.post("/clubs/create", clubData);
         return response.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Une erreur est survenue lors de la création du club");
+        return rejectWithValue(error.response?.data?.message || "Erreur lors de la création du club");
     }
 });
 
