@@ -1,16 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { getAllPromotions, createPromotion, deactivatePromotion, activatePromotion, deletePromotion } from '@/redux/features/promotionSlice';
 import { getAllClubs } from '@/redux/features/clubSlice';
-import { getAllClubs } from '@/redux/features/clubSlice';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import toast from 'react-hot-toast';
-import { FaEye, FaTrash, FaChevronDown, FaCheck } from 'react-icons/fa';
 import { FaEye, FaTrash, FaChevronDown, FaCheck } from 'react-icons/fa';
 import Modal from '@/app/components/ui/Modal';
 import Button from '@/app/components/ui/Button';
@@ -246,12 +243,7 @@ export default function CouponsPage() {
                                     value={newPromotion.promotion_code}
                                     onChange={(e) => setNewPromotion({...newPromotion, promotion_code: e.target.value.toUpperCase()})}
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4 h-12 ${validationErrors.promotion_code ? 'border-red-500' : ''}`}
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4 h-12 ${validationErrors.promotion_code ? 'border-red-500' : ''}`}
-                                    required
                                 />
-                                {validationErrors.promotion_code && (
-                                    <p className="mt-1 text-sm text-red-600">Veuillez entrer un code de promotion</p>
-                                )}
                                 {validationErrors.promotion_code && (
                                     <p className="mt-1 text-sm text-red-600">Veuillez entrer un code de promotion</p>
                                 )}
@@ -264,11 +256,7 @@ export default function CouponsPage() {
                                     value={newPromotion.validation_date}
                                     onChange={(e) => setNewPromotion({...newPromotion, validation_date: e.target.value})}
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4 h-12 ${validationErrors.validation_date ? 'border-red-500' : ''}`}
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4 h-12 ${validationErrors.validation_date ? 'border-red-500' : ''}`}
                                 />
-                                {validationErrors.validation_date && (
-                                    <p className="mt-1 text-sm text-red-600">Veuillez sélectionner une date d'expiration</p>
-                                )}
                                 {validationErrors.validation_date && (
                                     <p className="mt-1 text-sm text-red-600">Veuillez sélectionner une date d'expiration</p>
                                 )}
@@ -383,72 +371,6 @@ export default function CouponsPage() {
                                 <p className="mt-1 text-sm text-gray-500">
                                     Cliquez sur plusieurs clubs pour les sélectionner
                                 </p>
-                                <label htmlFor="id_club" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Clubs <span className="text-gray-400">(Optionnel)</span>
-                                </label>
-                                <div className="relative" ref={clubDropdownRef}>
-                                    <button
-                                        type="button"
-                                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm bg-white py-3 px-4 h-12 text-left focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 relative"
-                                        onClick={toggleClubDropdown}
-                                    >
-                                        <span className="block truncate">
-                                            {newPromotion.id_club.length === 0 
-                                                ? "Sélectionner un ou plusieurs clubs" 
-                                                : Object.values(selectedClubNames).join(', ')}
-                                        </span>
-                                        <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                            <FaChevronDown className="h-4 w-4 text-gray-400" />
-                                        </span>
-                                    </button>
-                                    
-                                    {isClubDropdownOpen && (
-                                        <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg z-10 max-h-60 overflow-auto">
-                                            <ul className="py-1">
-                                                {clubs.length === 0 ? (
-                                                    <li className="px-4 py-2 text-sm text-gray-500">
-                                                        Aucun club disponible
-                                                    </li>
-                                                ) : clubsLoading ? (
-                                                    <li className="px-4 py-2 text-sm text-gray-500">
-                                                        Chargement des clubs...
-                                                    </li>
-                                                ) : clubError ? (
-                                                    <li className="px-4 py-2 text-sm text-red-500 flex flex-col gap-2">
-                                                        <span>Erreur: Impossible de charger les clubs</span>
-                                                        <button 
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                dispatch(getAllClubs());
-                                                            }}
-                                                            className="text-xs bg-indigo-600 text-white py-1 px-2 rounded hover:bg-indigo-700"
-                                                        >
-                                                            Réessayer
-                                                        </button>
-                                                    </li>
-                                                ) : (
-                                                    clubs.map((club) => (
-                                                        <li 
-                                                            key={club._id} 
-                                                            className="px-4 py-2 hover:bg-indigo-50 cursor-pointer flex items-center"
-                                                            onClick={() => handleClubCheckboxChange(club._id, club.name)}
-                                                        >
-                                                            <div className="flex items-center justify-center w-5 h-5 mr-2 border rounded border-gray-400">
-                                                                {newPromotion.id_club.includes(club._id) && (
-                                                                    <FaCheck className="h-3 w-3 text-indigo-600" />
-                                                                )}
-                                                            </div>
-                                                            <span className="text-sm text-gray-700">{club.name}</span>
-                                                        </li>
-                                                    ))
-                                                )}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Cliquez sur plusieurs clubs pour les sélectionner
-                                </p>
                             </div>
                             <div>
                                 <label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-1">Valeur (%)</label>
@@ -457,7 +379,6 @@ export default function CouponsPage() {
                                     type="number"
                                     min="1"
                                     max="100"
-                                    step="1"
                                     step="1"
                                     placeholder="Ex: 30"
                                     value={newPromotion.value > 0 ? newPromotion.value : ''}
@@ -481,31 +402,8 @@ export default function CouponsPage() {
                                         }
                                     }}
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4 h-12 ${validationErrors.value ? 'border-red-500' : ''}`}
-                                    onChange={(e) => {
-                                        const value = parseInt(e.target.value);
-                                        if (!isNaN(value) && value >= 0 && value <= 100) {
-                                            setNewPromotion({ ...newPromotion, value });
-                                        } else if (e.target.value === '') {
-                                            setNewPromotion({ ...newPromotion, value: 0 });
-                                        }
-                                    }}
-                                    onKeyDown={(e) => {
-                                        // Prevent non-numeric input
-                                        if (!/[0-9]/.test(e.key) && 
-                                            e.key !== 'Backspace' && 
-                                            e.key !== 'Delete' && 
-                                            e.key !== 'ArrowLeft' && 
-                                            e.key !== 'ArrowRight' &&
-                                            e.key !== 'Tab') {
-                                            e.preventDefault();
-                                        }
-                                    }}
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4 h-12 ${validationErrors.value ? 'border-red-500' : ''}`}
                                     required
                                 />
-                                {validationErrors.value && (
-                                    <p className="mt-1 text-sm text-red-600">Veuillez entrer une valeur valide entre 1 et 100</p>
-                                )}
                                 {validationErrors.value && (
                                     <p className="mt-1 text-sm text-red-600">Veuillez entrer une valeur valide entre 1 et 100</p>
                                 )}
