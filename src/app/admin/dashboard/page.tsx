@@ -2,6 +2,7 @@ import { FaUsers } from 'react-icons/fa';
 import { MdEventNote } from 'react-icons/md';
 import { GiClubs } from 'react-icons/gi';
 import { FaMoneyBillWave } from 'react-icons/fa';
+import { FaTicketAlt } from 'react-icons/fa';
 import DashboardButton from '@/app/components/DashboardButton';
 
 export default function AdminDashboard() {
@@ -10,7 +11,7 @@ export default function AdminDashboard() {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-8 text-gray-800">Tableau de bord administrateur</h1>
 
-        <div className="grid grid-cols-2 gap-6 max-w-2xl mx-auto">
+        <div className="grid grid-cols-3 gap-6 max-w-4xl mx-auto">
             <DashboardButton 
                 title="Utilisateurs"
                 href="/admin/users"
@@ -34,6 +35,12 @@ export default function AdminDashboard() {
                 href="/admin/finances"
                 icon={FaMoneyBillWave}
                 description="Suivez les transactions et retrouvez toutes les données"
+            />
+            <DashboardButton 
+                title="Coupons"
+                href="/admin/coupons"
+                icon={FaTicketAlt}
+                description="Gérez les codes promo et réductions"
             />
         </div>
         </div>

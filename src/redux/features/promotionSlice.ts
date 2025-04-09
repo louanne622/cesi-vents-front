@@ -9,6 +9,7 @@ interface Promotion {
     max_use: number;
     id_club: string;
     activate: boolean;
+    value: number;
 }
 
 interface PromotionState {
@@ -28,13 +29,14 @@ const initialState: PromotionState = {
 // Créer une promotion
 export const createPromotion = createAsyncThunk(
     "promotions/createPromotion",
-    async ({ promotion_code, validation_date, max_use, id_club }: { promotion_code: string, validation_date: string | null, max_use: number, id_club: string }, { rejectWithValue }) => {
+    async ({ promotion_code, validation_date, max_use, id_club, value }: { promotion_code: string, validation_date: string | null, max_use: number, id_club: string, value: number }, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.post("/promotion/create", {
                 promotion_code,
                 validation_date,
                 max_use,
-                id_club
+                id_club,
+                value
             });
             return response.data;
         } catch (error: any) {
@@ -82,6 +84,19 @@ export const deactivatePromotion = createAsyncThunk(
     }
 );
 
+// Activer une promotion (admin)
+export const activatePromotion = createAsyncThunk(
+    "promotions/activatePromotion",
+    async (id: string, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.put(`/promotion/activate/${id}`);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Erreur lors de l'activation de la promotion");
+        }
+    }
+);
+
 // Vérifier la validité d'une promotion
 export const verifyPromotion = createAsyncThunk(
     "promotions/verifyPromotion",
@@ -94,6 +109,20 @@ export const verifyPromotion = createAsyncThunk(
         }
     }
 );
+
+// Supprimer une promotion (admin)
+export const deletePromotion = createAsyncThunk(
+    "promotions/deletePromotion",
+    async (id: string, { rejectWithValue }) => {
+        try {   
+            const response = await axiosInstance.delete(`/promotion/delete/${id}`);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Erreur lors de la suppression de la promotion");
+        }
+    }
+);
+
 
 const promotionSlice = createSlice({
     name: 'promotion',
@@ -162,6 +191,23 @@ const promotionSlice = createSlice({
                 state.error = action.payload as string;
             });
 
+        // Activer une promotion
+        builder
+            .addCase(activatePromotion.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(activatePromotion.fulfilled, (state, action) => {
+                state.loading = false;
+                state.promotions = state.promotions.map(promotion => 
+                    promotion._id === action.payload._id ? action.payload : promotion
+                );
+            })
+            .addCase(activatePromotion.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            });
+
         // Vérifier la validité d'une promotion
         builder
             .addCase(verifyPromotion.pending, (state) => {
@@ -173,6 +219,21 @@ const promotionSlice = createSlice({
                 state.currentPromotion = action.payload.promotion;
             })
             .addCase(verifyPromotion.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            });
+
+        // Supprimer une promotion
+        builder
+            .addCase(deletePromotion.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deletePromotion.fulfilled, (state, action) => {
+                state.loading = false;
+                state.promotions = state.promotions.filter(promotion => promotion._id !== action.payload._id);
+            })
+            .addCase(deletePromotion.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             });
