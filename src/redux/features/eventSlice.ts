@@ -17,6 +17,7 @@ type CreateEventData = {
   price: number;
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
+  clubId: string;
 };
 
 interface Event {
@@ -31,6 +32,7 @@ interface Event {
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
   createdBy: string;
+  clubId: string;
   participants: Participant[];
   createdAt: string;
   updatedAt: string;

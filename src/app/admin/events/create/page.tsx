@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaCalendarAlt, FaMapMarkerAlt, FaClock, FaUsers, FaMoneyBill } from 'react-icons/fa';
 import Button from '@/app/components/ui/Button';
 import { createEvent } from '@/redux/features/eventSlice';
-import { useAppDispatch } from '@/redux/hooks';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { toast } from 'react-hot-toast';
+import { getAllClubs } from '@/redux/features/clubSlice';
 
 interface EventFormData {
   title: string;
@@ -17,13 +18,20 @@ interface EventFormData {
   maxCapacity: string;
   price: string;
   registrationDeadline: string;
+  clubId: string;
   status: 'draft' | 'published' | 'cancelled';
 }
 
 export default function CreateEventPage() {
+  const clubs = useAppSelector((state) => state.club.clubs);
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    dispatch(getAllClubs());
+  }, [dispatch]);
+
 
   const [formData, setFormData] = useState<EventFormData>({
     title: '',
@@ -34,7 +42,8 @@ export default function CreateEventPage() {
     maxCapacity: '',
     price: '',
     registrationDeadline: '',
-    status: 'draft'
+    status: 'draft',
+    clubId: ''
   });
 
   const handleChange = (
@@ -52,6 +61,7 @@ export default function CreateEventPage() {
       const result = await dispatch(
         createEvent({
           ...formData,
+          clubId: formData.clubId,
           maxCapacity: parseInt(formData.maxCapacity),
           price: parseFloat(formData.price)
         })
@@ -202,6 +212,26 @@ export default function CreateEventPage() {
                 <option value="draft">Brouillon</option>
                 <option value="published">Publié</option>
                 <option value="cancelled">Annulé</option>
+              </select>
+            </div>
+
+            {/* Club */}
+            <div>
+              <label htmlFor="clubId" className="block text-sm font-medium text-gray-700 mb-1">
+                Club organisateur
+              </label>
+              <select
+                id="clubId"
+                name="clubId"
+                value={formData.clubId}
+                onChange={handleChange}
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
+                required
+              >
+                <option value="">Sélectionner un club</option>
+                {clubs.map((club) => (
+                  <option key={club._id} value={club._id}>{club.name}</option>
+                ))}
               </select>
             </div>
 
