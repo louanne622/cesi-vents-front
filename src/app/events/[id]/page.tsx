@@ -71,7 +71,6 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
-
         {/* Bouton retour */}
         <button
           onClick={() => router.back()}
