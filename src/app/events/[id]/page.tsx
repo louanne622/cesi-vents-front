@@ -14,6 +14,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { fetchEventById } from '@/redux/features/eventSlice';
+import React from 'react';
 
 interface Participant {
   userId: string;
@@ -38,14 +39,19 @@ interface Event {
   updatedAt: string;
 }
 
-export default function EventDetailsPage({ params }: { params: { id: string } }) {
+interface PageParams {
+  id: string;
+}
+
+export default function EventDetailsPage({ params }: { params: Promise<PageParams> }) {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { selectedEvent: event, status, error } = useSelector((state: RootState) => state.events);
+  const resolvedParams = React.use(params);
 
   useEffect(() => {
-    dispatch(fetchEventById(params.id));
-  }, [dispatch, params.id]);
+    dispatch(fetchEventById(resolvedParams.id));
+  }, [dispatch, resolvedParams.id]);
 
   if (status === 'loading') {
     return (
@@ -71,6 +77,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
+
         {/* Bouton retour */}
         <button
           onClick={() => router.back()}

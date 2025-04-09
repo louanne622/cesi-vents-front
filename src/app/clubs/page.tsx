@@ -6,78 +6,58 @@ import FilterBar from '@/app/components/ui/FilterBar';
 import SearchBar from '../components/events/SearchBar';
 import Button from '@/app/components/ui/Button';
 import { FaSearch, FaFilter } from 'react-icons/fa';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { getAllClubs } from '@/redux/features/clubSlice';
 
-const clubs = [
-  {
-    id: 1,
-    name: 'Club Photo',
-    description: 'Capturez les moments forts de la vie étudiante',
-    category: 'culture',
-    members: 45,
-    image: '/images/clubs/photo-club.jpg',
-    campus: 'Lille',
-    nextEvent: '15 Septembre 2023',
-  },
-  {
-    id: 2,
-    name: 'Club Robotique',
-    description: 'Concevez et construisez des robots',
-    category: 'tech',
-    members: 30,
-    image: '/images/clubs/robot-club.jpg',
-    campus: 'Lille',
-    nextEvent: '20 Septembre 2023',
-  },
-  {
-    id: 3,
-    name: 'Club Football',
-    description: 'Participez aux compétitions inter-campus',
-    category: 'sport',
-    members: 25,
-    image: '/images/clubs/football-club.jpg',
-    campus: 'Lille',
-    nextEvent: '10 Septembre 2023',
-  },
-  {
-    id: 4,
-    name: 'Club Théâtre',
-    description: 'Montez sur scène et exprimez-vous',
-    category: 'culture',
-    members: 35,
-    image: '/images/clubs/theatre-club.jpg',
-    campus: 'Lille',
-    nextEvent: '25 Septembre 2023',
-  },
-];
+const categories = ["Tous", "Culture", "Sport", "Tech", "Social"];
 
 export default function ClubsPage() {
+  const dispatch = useAppDispatch();
+  const { clubs, loading, error } = useAppSelector((state) => state.club);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
-  const [filteredClubs, setFilteredClubs] = useState(clubs);
 
-  const categories = ["Tous", "Culture", "Tech", "Sport", "Social"];
-
-  // Fonction pour filtrer les clubs en fonction des critères
+  // Fetch clubs when component mounts
   useEffect(() => {
-    let result = clubs;
+    dispatch(getAllClubs());
+  }, [dispatch]);
+
+  // Filter clubs based on search and category
+  const filteredClubs = clubs.filter((club) => {
+    const matchesSearch = 
+      club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      club.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      club.campus.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Filtrer par catégorie
-    if (selectedCategory !== "Tous") {
-      result = result.filter(club => club.category === selectedCategory.toLowerCase());
-    }
-    
-    // Filtrer par recherche
-    if (searchQuery.trim() !== "") {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(club => 
-        club.name.toLowerCase().includes(query) || 
-        club.description.toLowerCase().includes(query) ||
-        club.campus.toLowerCase().includes(query)
-      );
-    }
-    
-    setFilteredClubs(result);
-  }, [searchQuery, selectedCategory]);
+    const matchesCategory = 
+      selectedCategory === "Tous" || 
+      club.category.toLowerCase() === selectedCategory.toLowerCase();
+
+    return matchesSearch && matchesCategory;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#fbe216]" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500">Erreur lors du chargement des clubs</p>
+          <Button
+            text="Réessayer"
+            color="primary"
+            onClick={() => dispatch(getAllClubs())}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -151,7 +131,7 @@ export default function ClubsPage() {
         {/* Liste des clubs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClubs.map((club) => (
-            <ClubCard key={club.id} club={club} />
+            <ClubCard key={club._id} club={club} />
           ))}
         </div>
 
@@ -172,4 +152,4 @@ export default function ClubsPage() {
       </div>
     </div>
   );
-} 
+}

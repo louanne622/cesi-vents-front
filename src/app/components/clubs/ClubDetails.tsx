@@ -5,24 +5,29 @@ import Image from 'next/image';
 import { FaUsers, FaMapMarkerAlt, FaCalendarAlt, FaArrowLeft, FaEnvelope } from 'react-icons/fa';
 import Button from '../ui/Button';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { getClubById } from '@/redux/features/clubSlice';
+import { getClubById, getClubByName } from '@/redux/features/clubSlice';
 import { toast } from 'react-hot-toast';
 
 interface ClubDetailsProps {
-  clubId: string;
+  clubId?: string;
+  clubName?: string;
   onBack: () => void;
 }
 
-export default function ClubDetails({ clubId, onBack }: ClubDetailsProps) {
+export default function ClubDetails({ clubId, clubName, onBack }: ClubDetailsProps) {
   const dispatch = useAppDispatch();
   const { currentClub, loading, error } = useAppSelector((state) => state.club);
 
   useEffect(() => {
-    // Ne récupérer les données que si le club n'est pas déjà chargé ou si c'est un club différent
-    if (!currentClub || currentClub._id !== clubId) {
+    // Ne récupérer les données que si le club n'est pas déjà chargé
+    if (!currentClub || (clubId && currentClub._id !== clubId)) {
       const fetchClub = async () => {
         try {
-          await dispatch(getClubById(clubId));
+          if (clubName) {
+            await dispatch(getClubByName(clubName));
+          } else if (clubId) {
+            await dispatch(getClubById(clubId));
+          }
         } catch (error) {
           toast.error('Erreur lors de la récupération des détails du club');
         }
@@ -30,7 +35,7 @@ export default function ClubDetails({ clubId, onBack }: ClubDetailsProps) {
 
       fetchClub();
     }
-  }, [dispatch, clubId, currentClub?._id]);
+  }, [dispatch, clubId, clubName, currentClub?._id]);
 
   useEffect(() => {
     if (error) {
