@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { FaCalendarAlt, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 
 interface EventCardProps {
-  id: number;
+  id: string;
   title: string;
   imageUrl: string;
   place: string;

@@ -50,9 +50,6 @@ export default function EventsPage() {
   useEffect(() => {
     let result = events;
 
-    if (selectedCategory !== "Tous") {
-      result = result.filter(event => event.category?.toLowerCase() === selectedCategory.toLowerCase());
-    }
 
     if (searchTerm.trim() !== "") {
       const term = searchTerm.toLowerCase();
