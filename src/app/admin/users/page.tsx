@@ -9,12 +9,11 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { deleteUser, getAllUsers, getUserById, User } from '@/redux/features/userSlice';
-import { RootState } from '@/redux/store';
+
 
 export default function AdminUsersPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const userState = useAppSelector((state: RootState) => state.auth.user);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,34 +55,30 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleDeleteClick = (userId: string) => {
+  const confirmDeleteUser = (userId: string) => {
+    // TODO Empêcher la suppression du profil courant (currentUser)
     setUserToDelete(userId);
     setIsDeleteModalOpen(true);
   };
-
-  const handleDeleteConfirm = async () => {
-    if (!userToDelete) return;
     
+  const handleDelete = async (userIdToDelete: string) => {
+    console.log("handleDelete triggered avec :", userIdToDelete);
+
     try {
-      console.log('Début de la suppression de l\'utilisateur:', userToDelete);
-      await dispatch(deleteUser(userToDelete)).unwrap();
-      
-      // Recharger la liste des utilisateurs
-      await dispatch(getAllUsers()).unwrap();
-      
+      await dispatch(deleteUser({ id: userIdToDelete })).unwrap();
+      console.log("Suppression réussie !");
       toast.success('Utilisateur supprimé avec succès');
       setIsDeleteModalOpen(false);
       setUserToDelete(null);
+
+      const updatedUsers = await dispatch(getAllUsers()).unwrap();
+      setUsers(updatedUsers);
     } catch (error: any) {
-      console.error('Erreur lors de la suppression:', error);
       toast.error(error.message || 'Erreur lors de la suppression de l\'utilisateur');
     }
   };
 
-  const handleDeleteCancel = () => {
-    setIsDeleteModalOpen(false);
-    setUserToDelete(null);
-  };
+ 
 
   const filteredUsers = users.filter((user: User) => {
     const matchesSearch = (user.first_name + ' ' + user.last_name).toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -203,7 +198,7 @@ export default function AdminUsersPage() {
                         variant="outline"
                         size="sm"
                         icon={<FaTrash />}
-                        onClick={() => handleDeleteClick(user._id)}
+                        onClick={() => confirmDeleteUser(user._id)}
                         className="flex items-center justify-center w-8 h-8"
                       />
                       <Button
@@ -226,8 +221,13 @@ export default function AdminUsersPage() {
 
       <Modal
         isOpen={isDeleteModalOpen}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={() => {
+          console.log("SUPPRESSION DE : ", userToDelete);
+          if (userToDelete) {
+            handleDelete(userToDelete);
+          }
+        }}
         title="Supprimer l'utilisateur"
         message="Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible."
         confirmText="Supprimer"

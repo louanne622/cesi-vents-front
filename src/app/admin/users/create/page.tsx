@@ -6,44 +6,43 @@ import { FaArrowLeft, FaUser } from 'react-icons/fa';
 import Button from '../../../components/ui/Button';
 import { useAppDispatch } from '@/redux/hooks';
 import { toast } from 'react-hot-toast';
-import { register } from '@/redux/features/authSlice';
+import { UserCreatePayload } from '@/app/types/User';
+import { addUser } from '@/redux/features/userSlice';
 
 export default function CreateUserPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const MAX_IMAGE_SIZE = 50 * 1024; // 50KB en bytes
   
-  const [userData, setUserData] = useState({
+  const [userData, setUserData] = useState<UserCreatePayload>({
     first_name: '',
-    last_name: '', 
+    last_name: '',
     email: '',
+    password: '',
     phone: '',
     campus: '',
-    role: '',
-    avatar: { url: '', alt: '' },
+    role: 'user',
     bde_member: false,
-    password: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      // Vérification de la taille de l'image
-      if (userData.avatar.url) {
-        const base64String = userData.avatar.url.split(',')[1];
-        const fileSize = Math.ceil((base64String.length * 3) / 4);
-        if (fileSize > MAX_IMAGE_SIZE) {
-          toast.error(`L'image ne doit pas dépasser ${MAX_IMAGE_SIZE / 1024}KB`);
-          return;
-        }
-      }
+      // Créer un objet qui correspond à ce que l'API attend
+      const userDataToSend = {
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        email: userData.email,
+        phone: userData.phone,
+        campus: userData.campus,
+        role: userData.role,
+        bde_member: userData.bde_member,
+        password: userData.password
+      };
 
-
-
-      const result = await dispatch(register(userData)).unwrap();
+      console.log("Data envoyée au backend :", userDataToSend);
+      await dispatch(addUser(userDataToSend)).unwrap();
       toast.success("Utilisateur créé avec succès !");
       router.push('/admin/users');
     } catch (error: any) {
@@ -56,28 +55,6 @@ export default function CreateUserPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setUserData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > MAX_IMAGE_SIZE) {
-        toast.error(`L'image ne doit pas dépasser ${MAX_IMAGE_SIZE / 1024}KB`);
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUserData(prev => ({
-          ...prev,
-          avatar: {
-            url: reader.result as string,
-            alt: file.name
-          }
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   return (
@@ -217,36 +194,6 @@ export default function CreateUserPage() {
                 <option value="Arras">Arras</option>
                 <option value="Rouen">Rouen</option>
               </select>
-            </div>
-
-            <div>
-              <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 mb-1">
-                Photo de profil
-              </label>
-              <div className="flex items-center space-x-4">
-                <input
-                  type="file"
-                  id="avatar"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="avatar"
-                  className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700"
-                >
-                  Choisir une image
-                </label>
-                {userData.avatar.url && (
-                  <div className="relative h-20 w-20">
-                    <img
-                      src={userData.avatar.url}
-                      alt={userData.avatar.alt}
-                      className="object-cover rounded-full"
-                    />
-                  </div>
-                )}
-              </div>
             </div>
 
             <div className="flex items-center">

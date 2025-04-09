@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaUser, FaLock } from 'react-icons/fa';
 import Button from '@/app/components/ui/Button';
@@ -8,11 +8,8 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { getUserById, updateUser } from '@/redux/features/userSlice';
 import { toast } from 'react-hot-toast';
 
-interface PageParams {
-  id: string;
-}
-
-export default function EditUserPage({ params }: { params: Promise<PageParams> }) {
+export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: userId } = use(params);
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { currentUser, loading, error } = useAppSelector((state) => state.user);
@@ -22,14 +19,13 @@ export default function EditUserPage({ params }: { params: Promise<PageParams> }
     first_name: '',
     last_name: '',
     email: '',
-    role: '',
+    phone: '',
+    campus: '',
     password: '',
     confirmPassword: '',
-    avatar: { url: '', alt: '' }
+    bde_member: false,
+    role: 'user',
   });
-
-  const resolvedParams = React.use(params);
-  const userId = resolvedParams.id;
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -50,11 +46,11 @@ export default function EditUserPage({ params }: { params: Promise<PageParams> }
         last_name: currentUser.last_name,
         email: currentUser.email,
         role: currentUser.role,
+        phone: currentUser.phone,
+        campus: currentUser.campus,
+        bde_member: currentUser.bde_member,
         password: '',
         confirmPassword: '',
-        avatar: typeof currentUser.avatar === 'string' 
-          ? { url: currentUser.avatar, alt: currentUser.first_name } 
-          : currentUser.avatar || { url: '', alt: '' }
       });
     }
   }, [currentUser]);
@@ -82,25 +78,20 @@ export default function EditUserPage({ params }: { params: Promise<PageParams> }
         return;
       }
 
-      const data = {
+      const UserDataToSend = {
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email,
-        role: formData.role,
-        avatar: formData.avatar,
+        phone: formData.phone,
+        campus: formData.campus,
+        bde_member: formData.bde_member,
+        role: formData.role as "user" | "admin" | "clubleader",
         ...(formData.password && { password: formData.password }),
-        phone: currentUser.phone,
-        campus: currentUser.campus
       };
 
-      const result = await dispatch(updateUser({ id: userId, data })).unwrap();
-      
-      if (result.success) {
-        toast.success('Utilisateur mis à jour avec succès');
-        router.push('/admin/users');
-      } else {
-        throw new Error(result.message || 'Erreur lors de la mise à jour');
-      }
+      await dispatch(updateUser({ id: userId, data: UserDataToSend })).unwrap();
+      toast.success('Utilisateur mis à jour avec succès');
+      router.push('/admin/users');
     } catch (error: any) {
       toast.error(error.message || 'Erreur lors de la mise à jour de l\'utilisateur');
     } finally {
@@ -218,6 +209,43 @@ export default function EditUserPage({ params }: { params: Promise<PageParams> }
               </div>
             </div>
 
+            {/* Téléphone */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                Téléphone
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone || ''}
+                onChange={handleChange}
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                placeholder="Ex: 0612345678"
+              />
+            </div>
+
+            {/* Campus */}
+            <div>
+              <label htmlFor="campus" className="block text-sm font-medium text-gray-700 mb-1">
+                Campus
+              </label>
+              <select
+                id="campus"
+                name="campus"
+                value={formData.campus || ''}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+              >
+                <option value="">Sélectionner un campus</option>
+                <option value="Lille">Lille</option>
+                <option value="Paris">Paris</option>
+                <option value="Arras">Arras</option>
+                <option value="Rouen">Rouen</option>
+              </select>
+            </div>
+
             {/* Mot de passe */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
@@ -268,60 +296,30 @@ export default function EditUserPage({ params }: { params: Promise<PageParams> }
               <select
                 id="role"
                 name="role"
-                value={formData.role}
+                value={formData.role || ''}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
               >
                 <option value="user">Utilisateur</option>
                 <option value="admin">Administrateur</option>
+                <option value="clubleader">Club Leader</option>
               </select>
             </div>
 
-            {/* Avatar */}
-            <div>
-              <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 mb-1">
-                Avatar
+            {/* BDE Member */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="bde_member"
+                name="bde_member"
+                checked={formData.bde_member}
+                onChange={(e) => setFormData(prev => ({ ...prev, bde_member: e.target.checked }))}
+                className="h-4 w-4 text-[#fbe216] border-gray-300 rounded focus:ring-[#fbe216]"
+              />
+              <label htmlFor="bde_member" className="ml-2 block text-sm text-gray-900">
+                Membre du BDE
               </label>
-              <div className="flex items-center space-x-4">
-                <input
-                  type="file"
-                  id="avatar"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setFormData(prev => ({
-                          ...prev,
-                          avatar: {
-                            url: reader.result as string,
-                            alt: file.name
-                          }
-                        }));
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="avatar"
-                  className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-gray-700"
-                >
-                  Changer l'avatar
-                </label>
-                {formData.avatar.url && (
-                  <div className="relative h-20 w-20">
-                    <img
-                      src={formData.avatar.url}
-                      alt={formData.avatar.alt}
-                      className="object-cover rounded-full"
-                    />
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Boutons d'action */}

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosConfig";
+import { UserCreatePayload, UserUpdatePayload } from "@/app/types/User";
 
 export interface User {
     _id: string;
@@ -14,6 +15,8 @@ export interface User {
     createdAt: string;
     updatedAt: string;
 }
+
+
 
 interface UserState {
     users: User[];
@@ -32,15 +35,19 @@ export const getAllUsers = createAsyncThunk("users/getAllUsers", async (_: void,
     }
 });
 
-// Create user
-export const createUser = createAsyncThunk("users/createUser", async (userData: User, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
-    try {
-        const response = await axiosInstance.post("/auth/addUser", userData);
-        return response.data;
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Erreur serveur");
+export const addUser = createAsyncThunk(
+    'users/AddUser',
+    async (userData: UserCreatePayload, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.post("/auth/addUser", userData, {
+                withCredentials: true,
+            });
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Erreur serveur");
+        }
     }
-});
+)
 
 // Get user by id
 export const getUserById = createAsyncThunk(
@@ -56,15 +63,12 @@ export const getUserById = createAsyncThunk(
 );
 
 // Update user
-export const updateUser = createAsyncThunk("users/updateUser", async ({ id, data }: { 
+export const updateUser = createAsyncThunk(
+    "users/updateUser",
+    async ({ id, data }: { 
     id: string, 
-    data: {
-        first_name?: string,
-        last_name?: string,
-        phone?: string,
-        campus?: string
-    }
-}, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
+    data: Partial<UserUpdatePayload>
+    }, { rejectWithValue }) => {
     try {
         const response = await axiosInstance.put(`/auth/updateUser/${id}`, data);
         return response.data;
@@ -74,9 +78,16 @@ export const updateUser = createAsyncThunk("users/updateUser", async ({ id, data
 });
 
 // Delete user
-export const deleteUser = createAsyncThunk("users/deleteUser", async (id: string, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
+export const deleteUser = createAsyncThunk(
+    "users/deleteUser",
+     async ({ id }: {id: string}, 
+    { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
     try {
-        const response = await axiosInstance.delete(`/auth/deleteUser/${id}`);
+        const response = await axiosInstance.delete(`/auth/deleteUser/${id}`,
+            {
+                withCredentials: true,
+            }   
+        );
         return response.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Erreur serveur");
