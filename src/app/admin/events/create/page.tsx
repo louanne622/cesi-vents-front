@@ -57,9 +57,11 @@ export default function CreateEventPage() {
         })
       );
 
-      if (createEvent.fulfilled.match(result)) {
+      if (result.meta.requestStatus === 'fulfilled') {
         toast.success('Événement créé avec succès !');
         router.push('/admin/events');
+      } else {
+        toast.error("Erreur lors de la création de l'événement");
       }
     } catch (error) {
       toast.error("Erreur lors de la création de l'événement");

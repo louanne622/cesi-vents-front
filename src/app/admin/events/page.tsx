@@ -2,21 +2,24 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
-import { FaCalendarAlt, FaSearch, FaFilter, FaPlus } from 'react-icons/fa';
-import Button from '@/app/components/ui/Button';
-import { fetchEvents } from '@/redux/features/eventSlice';
-import { RootState, AppDispatch } from '@/redux/store';
+import { FaCalendarAlt, FaSearch, FaFilter, FaPlus, FaEye, FaTrash, FaPencilAlt } from 'react-icons/fa';
+import Button from '@/components/ui/Button';
+import Modal from '@/app/components/ui/Modal';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { fetchEvents, cancelEvent } from '@/redux/features/eventSlice';
+import { toast } from 'react-hot-toast';
 
 
 
 export default function AdminEventsPage() {
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
   
-  const { events, status, error } = useSelector((state: RootState) => state.events);
+  const { events, status, error } = useAppSelector((state) => state.events);
 
   useEffect(() => {
     if (status === 'idle') {
@@ -158,12 +161,30 @@ export default function AdminEventsPage() {
                         {event.status === 'published' ? 'Publié' : event.status === 'draft' ? 'Brouillon' : 'Annulé'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <Button
+                        text="Voir"
+                        color="secondary"
+                        variant="outline"
+                        icon={<FaEye />}
+                        onClick={() => router.push(`/admin/events/${event._id}`)}
+                      />
                       <Button
                         text="Modifier"
                         color="secondary"
                         variant="outline"
+                        icon={<FaPencilAlt />}
                         onClick={() => router.push(`/admin/events/${event._id}/edit`)}
+                      />
+                      <Button
+                        text="Supprimer"
+                        color="secondary"
+                        variant="outline"
+                        icon={<FaTrash />}
+                        onClick={() => {
+                          setEventToDelete(event._id);
+                          setIsDeleteModalOpen(true);
+                        }}
                       />
                     </td>
                   </tr>
@@ -172,6 +193,54 @@ export default function AdminEventsPage() {
             </table>
           </div>
         </div>
+
+        {/* Modal de confirmation de suppression */}
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setEventToDelete(null);
+          }}
+          title="Confirmer la suppression"
+        >
+          <div className="p-6">
+            <p className="text-gray-700 mb-6">
+              Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <Button
+                text="Annuler"
+                color="secondary"
+                variant="outline"
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setEventToDelete(null);
+                }}
+              />
+              <Button
+                text="Supprimer"
+                color="secondary"
+                onClick={async () => {
+                  if (eventToDelete) {
+                    try {
+                      const result = await dispatch(cancelEvent(eventToDelete));
+                      if (result.meta.requestStatus === 'fulfilled') {
+                        toast.success('Événement supprimé avec succès');
+                        dispatch(fetchEvents());
+                      } else {
+                        toast.error("Erreur lors de la suppression de l'événement");
+                      }
+                    } catch (error) {
+                      toast.error("Erreur lors de la suppression de l'événement");
+                    }
+                    setIsDeleteModalOpen(false);
+                    setEventToDelete(null);
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   );

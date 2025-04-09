@@ -92,6 +92,34 @@ export const fetchEventById = createAsyncThunk(
   }
 );
 
+// Modifier un événement
+export const updateEvent = createAsyncThunk(
+  'events/updateEvent',
+  async ({ id, eventData }: { id: string; eventData: Partial<CreateEventData> & { forceUpdate?: boolean } }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/events/${id}/`, eventData);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Erreur inconnue";
+      return rejectWithValue(message);
+    }
+  }
+);
+
+// Annuler un événement
+export const cancelEvent = createAsyncThunk(
+  'events/cancelEvent',
+  async (eventId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(`/events/${eventId}/`);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Erreur inconnue";
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const eventSlice = createSlice({
   name: 'events',
   initialState,
@@ -128,6 +156,51 @@ const eventSlice = createSlice({
         state.selectedEvent = action.payload;
       })
       .addCase(fetchEventById.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      // Gestion de createEvent
+      .addCase(createEvent.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(createEvent.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.events.push(action.payload);
+      })
+      .addCase(createEvent.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      // Gestion de updateEvent
+      .addCase(updateEvent.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(updateEvent.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        const index = state.events.findIndex(event => event._id === action.payload._id);
+        if (index !== -1) {
+          state.events[index] = action.payload;
+        }
+      })
+      .addCase(updateEvent.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      // Gestion de cancelEvent
+      .addCase(cancelEvent.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(cancelEvent.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        const index = state.events.findIndex(event => event._id === action.payload.event._id);
+        if (index !== -1) {
+          state.events[index] = action.payload.event;
+        }
+      })
+      .addCase(cancelEvent.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
       });

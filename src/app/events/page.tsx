@@ -9,8 +9,6 @@ import EventCard from '../components/Eventcard';
 import FilterBar from '@/app/components/ui/FilterBar';
 import SearchBar from '../components/events/SearchBar';
 
-
-
 interface Event {
   category?: string;
   _id: string;

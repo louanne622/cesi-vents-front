@@ -232,7 +232,7 @@ export default function AdminClubsPage() {
                         variant="outline"
                         size="sm"
                         icon={<FaPencilAlt />}
-                        onClick={() => window.location.href = `/admin/clubs/${club._id}/edit`}
+                        onClick={() => router.push(`/admin/clubs/${club._id}/edit`)}
                         className="flex items-center justify-center w-8 h-8"
                       />
                     </td>

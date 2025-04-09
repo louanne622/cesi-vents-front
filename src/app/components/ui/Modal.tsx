@@ -4,9 +4,10 @@ import Button from './Button';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
   title: string;
-  message: string;
+  children?: React.ReactNode;
+  onConfirm?: () => void;
+  message?: string;
   confirmText?: string;
   cancelText?: string;
 }
@@ -17,6 +18,7 @@ export default function Modal({
   onConfirm,
   title,
   message,
+  children,
   confirmText = 'Confirmer',
   cancelText = 'Annuler'
 }: ModalProps) {
@@ -62,23 +64,25 @@ export default function Modal({
 
           {/* Corps de la popin */}
           <div className="px-6 py-4">
-            <p className="text-gray-600">{message}</p>
+            {children ? children : message && <p className="text-gray-600">{message}</p>}
           </div>
 
           {/* Pied de la popin */}
-          <div className="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end space-x-4">
-            <Button
-              text={cancelText}
-              color="secondary"
-              variant="outline"
-              onClick={onClose}
-            />
-            <Button
-              text={confirmText}
-              color="danger"
-              onClick={onConfirm}
-            />
-          </div>
+          {onConfirm && (
+            <div className="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end space-x-4">
+              <Button
+                text={cancelText}
+                color="secondary"
+                variant="outline"
+                onClick={onClose}
+              />
+              <Button
+                text={confirmText}
+                color="danger"
+                onClick={onConfirm}
+              />
+            </div>
+          )}
         </div>
       </div>
     </>
