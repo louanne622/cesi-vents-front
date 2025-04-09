@@ -2,9 +2,7 @@
 
 import { useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import {
   FaCalendar,
   FaMapMarkerAlt,
@@ -40,22 +38,20 @@ interface Event {
   updatedAt: string;
 }
 
-interface EventDetailsPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function EventDetailsPage({
-  params,
-}: EventDetailsPageProps) {
+export default function EventDetailsPage() {
+  const { id } = useParams();            // <-- retrieve [id] here
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const { selectedEvent: event, status, error } = useSelector((state: RootState) => state.events);
+  const { selectedEvent: event, status, error } = useSelector(
+    (state: RootState) => state.events
+  );
 
   useEffect(() => {
-    dispatch(fetchEventById(params.id));
-  }, [dispatch, params.id]);
+    if (id) {
+      const eventId = Array.isArray(id) ? id[0] : id;
+      dispatch(fetchEventById(eventId));
+    }
+  }, [dispatch, id]);
 
   if (status === 'loading') {
     return (
@@ -76,11 +72,12 @@ export default function EventDetailsPage({
     );
   }
 
-  const confirmedParticipants = event.participants.filter((p: { status: string }) => p.status === 'confirmed').length;
+  const confirmedParticipants = event.participants.filter(p => p.status === 'confirmed').length;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
+
         {/* Bouton retour */}
         <button
           onClick={() => router.back()}
