@@ -160,7 +160,7 @@ export default function EventDetailsPage({ params }: { params: Promise<PageParam
           <button
             className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-lg hover:bg-yellow-500 transition-colors text-lg font-medium"
             disabled={event.status !== 'published' || confirmedParticipants >= event.maxCapacity}
-            onClick={() => console.log("TODO: implémenter l'inscription")}
+            onClick={() => router.push(`/events/${event._id}/payment`)}
           >
             {event.status !== 'published'
               ? 'Inscriptions non ouvertes'

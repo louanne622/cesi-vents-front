@@ -120,36 +120,18 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Événements à venir */}
+          {/* Mes tickets */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Événements à venir</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <h4 className="font-medium text-gray-900">Soirée d'intégration</h4>
-                  <p className="text-sm text-gray-500">15 Septembre 2023</p>
-                </div>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Mes tickets</h3>
+              <Link href="/profile/tickets">
                 <Button
-                  text="Voir détails"
+                  text="Mes tickets"
                   color="primary"
                   variant="outline"
                   size="sm"
-                  onClick={() => {}}
                 />
-              </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <h4 className="font-medium text-gray-900">Hackathon CESI</h4>
-                  <p className="text-sm text-gray-500">20-22 Octobre 2023</p>
-                </div>
-                <Button
-                  text="Voir détails"
-                  color="primary"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {}}
-                />
-              </div>
+              </Link>
             </div>
           </div>
         </div>
