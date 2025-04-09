@@ -1,161 +1,168 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import Image from 'next/image';
-import Button from '@/app/components/ui/Button';
-import { FaArrowLeft, FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaEuroSign } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
+import {
+  FaCalendar,
+  FaMapMarkerAlt,
+  FaUser,
+  FaUsers,
+  FaMoneyBillWave,
+  FaClock,
+} from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/redux/store';
+import { fetchEventById } from '@/redux/features/eventSlice';
 
-// Données de démonstration (à remplacer par un appel API)
-const eventsListData = [
-  {
-    id: 1,
-    title: "Soirée d'intégration CESI",
-    description: "Rejoignez-nous pour une soirée exceptionnelle pour accueillir les nouveaux étudiants du CESI. Au programme : animations, musique et surprises !",
-    date: {
-      day: "15",
-      month: "Septembre"
-    },
-    time: "19:00",
-    location: "Campus CESI - Hall Principal",
-    image: "/img/lan.jpg",
-    category: "Social",
-    organizer: "BDE CESI",
-    price: "Gratuit",
-    participants: {
-      current: 120,
-      max: 200
-    }
-  },
-  {
-    id: 2,
-    title: "Tournoi de Jeux Vidéo",
-    description: "Participez à notre tournoi de jeux vidéo ! Au programme : League of Legends, Valorant, et bien d'autres. Des lots à gagner !",
-    date: {
-      day: "22",
-      month: "Septembre"
-    },
-    time: "14:00",
-    location: "Salle Multimédia CESI",
-    image: "/img/lan.jpg",
-    category: "Gaming",
-    organizer: "Club Gaming CESI",
-    price: "5€",
-    participants: {
-      current: 45,
-      max: 50
-    }
-  },
-  {
-    id: 3,
-    title: "Atelier Développement Web",
-    description: "Apprenez les bases du développement web avec nos experts. HTML, CSS, JavaScript et plus encore !",
-    date: {
-      day: "30",
-      month: "Septembre"
-    },
-    time: "10:00",
-    location: "Salle Informatique CESI",
-    image: "/img/lan.jpg",
-    category: "Formation",
-    organizer: "Club Tech CESI",
-    price: "Gratuit",
-    participants: {
-      current: 15,
-      max: 30
-    }
-  }
-];
+interface Participant {
+  userId: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  registrationDate: string;
+}
 
-export default function EventDetailPage() {
-  const params = useParams();
+interface Event {
+  _id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  maxCapacity: number;
+  price: number;
+  registrationDeadline: string;
+  status: 'draft' | 'published' | 'cancelled';
+  createdBy: string;
+  participants: Participant[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export default function EventDetailsPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [event, setEvent] = useState<any>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const { selectedEvent: event, status, error } = useSelector((state: RootState) => state.events);
 
   useEffect(() => {
-    const eventId = parseInt(params.id as string);
-    const foundEvent = eventsListData.find(e => e.id === eventId);
-    setEvent(foundEvent);
-  }, [params.id]);
+    dispatch(fetchEventById(params.id));
+  }, [dispatch, params.id]);
 
-  if (!event) {
+  if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-500">Événement non trouvé</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* En-tête avec bouton retour */}
-        <div className="flex items-center mb-8">
-          <Button
-            text="Retour"
-            color="secondary"
-            variant="outline"
-            icon={<FaArrowLeft />}
-            iconPosition="left"
-            onClick={() => router.back()}
-          />
+  if (status === 'failed' || !event) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Erreur</h2>
+          <p className="text-gray-600">{error || 'Événement non trouvé'}</p>
         </div>
+      </div>
+    );
+  }
 
-        {/* Image de l'événement */}
-        <div className="relative w-full h-64 md:h-96 mb-8 rounded-xl overflow-hidden">
+  const confirmedParticipants = event.participants.filter(p => p.status === 'confirmed').length;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto py-8 px-4">
+        {/* Bouton retour */}
+        <button
+          onClick={() => router.back()}
+          className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Retour
+        </button>
+
+        {/* Image principale */}
+        <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden mb-8">
           <Image
-            src={event.image}
+            src="/img/lan.jpg"
             alt={event.title}
             fill
             className="object-cover"
+            sizes="(max-width: 896px) 100vw, 896px"
           />
         </div>
-        {/* Informations principales */}
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">{event.title}</h1>
-          
-          {/* Métadonnées */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+
+        {/* Titre */}
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">{event.title}</h1>
+
+        {/* Détails principaux */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* Infos de base */}
+          <div className="space-y-4">
             <div className="flex items-center text-gray-600">
-              <FaCalendarAlt className="mr-2 text-[#fbe216]" />
-              <span>{event.date.day} {event.date.month} à {event.time}</span>
+              <FaCalendar className="w-5 h-5 mr-3 text-yellow-400" />
+              <span>
+                {new Date(event.date).toLocaleDateString('fr-FR', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </span>
             </div>
             <div className="flex items-center text-gray-600">
-              <FaMapMarkerAlt className="mr-2 text-[#fbe216]" />
+              <FaClock className="w-5 h-5 mr-3 text-yellow-400" />
+              <span>{event.time}</span>
+            </div>
+            <div className="flex items-center text-gray-600">
+              <FaMapMarkerAlt className="w-5 h-5 mr-3 text-yellow-400" />
               <span>{event.location}</span>
             </div>
+          </div>
+
+          {/* Stats */}
+          <div className="space-y-4">
             <div className="flex items-center text-gray-600">
-              <FaUsers className="mr-2 text-[#fbe216]" />
-              <span>{event.participants.current}/{event.participants.max} participants</span>
+              <FaUsers className="w-5 h-5 mr-3 text-yellow-400" />
+              <span>{confirmedParticipants}/{event.maxCapacity} participants</span>
             </div>
             <div className="flex items-center text-gray-600">
-              <FaEuroSign className="mr-2 text-[#fbe216]" />
-              <span>{event.price}</span>
+              <FaMoneyBillWave className="w-5 h-5 mr-3 text-yellow-400" />
+              <span>{event.price === 0 ? 'Gratuit' : `${event.price}€`}</span>
             </div>
           </div>
+        </div>
 
-          {/* Description */}
-          <div className="prose max-w-none mb-8">
-            <p className="text-gray-700">{event.description}</p>
-          </div>
+        {/* Description */}
+        <div className="bg-white rounded-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
+          <p className="text-gray-600 whitespace-pre-line">{event.description}</p>
+        </div>
 
-          {/* Organisateur */}
-          <div className="bg-gray-50 p-4 rounded-lg mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Organisé par</h3>
-            <p className="text-gray-600">{event.organizer}</p>
+        {/* Organisateur */}
+        <div className="bg-white rounded-lg p-6 mb-8">
+          <div className="flex items-center text-gray-600">
+            <FaUser className="w-5 h-5 mr-3 text-yellow-400" />
+            <span>Organisé par {event.createdBy}</span>
           </div>
+        </div>
 
-          {/* Bouton d'inscription */}
-          <div className="flex justify-center">
-            <Button
-              text="S'inscrire à l'événement"
-              color="primary"
-              onClick={() => router.push(`/events/${event.id}/register`)}
-            />
-          </div>
+        {/* Bouton inscription */}
+        <div className="flex justify-center">
+          <button
+            className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-lg hover:bg-yellow-500 transition-colors text-lg font-medium"
+            disabled={event.status !== 'published' || confirmedParticipants >= event.maxCapacity}
+            onClick={() => console.log("TODO: implémenter l'inscription")}
+          >
+            {event.status !== 'published'
+              ? 'Inscriptions non ouvertes'
+              : confirmedParticipants >= event.maxCapacity
+              ? 'Événement complet'
+              : "S'inscrire"}
+          </button>
         </div>
       </div>
     </div>
   );
-} 
-
+}
