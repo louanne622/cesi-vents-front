@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaCog, FaSignOutAlt, FaMoneyBillWave, FaTicketAlt } from "react-icons/fa";
+import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaCog, FaSignOutAlt, FaMoneyBillWave, FaTicketAlt, FaMoneyBillWave, FaTicketAlt } from "react-icons/fa";
+import { MdEventNote } from 'react-icons/md';
+import { GiClubs } from 'react-icons/gi';
 import { MdEventNote } from 'react-icons/md';
 import { GiClubs } from 'react-icons/gi';
 import Image from "next/image";
@@ -112,12 +114,45 @@ const Navbar = () => {
     });
   }
 
+  const adminNavItems = [
+    {
+      href: "/admin/dashboard",
+      label: "Tableau de bord",
+      icon: FaHome,
+    },
+    {
+      href: "/admin/users",
+      label: "Utilisateurs",
+      icon: FaUsers,
+    },
+    {
+      href: "/admin/clubs",
+      label: "Clubs",
+      icon: GiClubs,
+    },
+    {
+      href: "/admin/events",
+      label: "Événements",
+      icon: MdEventNote,
+    },
+    {
+      href: "/admin/finances",
+      label: "Finances",
+      icon: FaMoneyBillWave,
+    },
+    {
+      href: "/admin/coupons",
+      label: "Coupons",
+      icon: FaTicketAlt,
+    },
+  ];
+
   return (
     <>
       {/* Version mobile nav */}
       <nav className="fixed md:hidden bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
         <div className="flex justify-around items-center h-16">
-          {(pathname.startsWith('/admin') ? adminNavItems : navItems).map((item) => {
+          {(pathname.startsWith('/admin') ? adminNavItems : (pathname.startsWith('/admin') ? adminNavItems : navItems)).map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link 
@@ -155,7 +190,7 @@ const Navbar = () => {
         {/* Menu principal */}
         <div className="flex-1 py-8 px-4"> {/* Augmenté le padding vertical */}
           <div className="space-y-2">
-            {(pathname.startsWith('/admin') ? adminNavItems : navItems).map((item) => {
+            {(pathname.startsWith('/admin') ? adminNavItems : (pathname.startsWith('/admin') ? adminNavItems : navItems)).map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
