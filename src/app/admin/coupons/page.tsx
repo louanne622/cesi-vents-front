@@ -106,12 +106,10 @@ export default function CouponsPage() {
             console.log('Setting clubs with length:', storeClubs.length);
             setClubs(storeClubs);
             
-            // Update selectedClubNames with existing club names
+            // Update selectedClubNames with all club names
             const clubNames: Record<string, string> = {};
             storeClubs.forEach((club: Club) => {
-                if (newPromotion.id_club.includes(club._id)) {
-                    clubNames[club._id] = club.name;
-                }
+                clubNames[club._id] = club.name;
             });
             setSelectedClubNames(clubNames);
         }
@@ -232,14 +230,9 @@ export default function CouponsPage() {
         if (clubIndex === -1) {
             // Add club
             updatedClubs.push(clubId);
-            const updatedNames = { ...selectedClubNames, [clubId]: clubName };
-            setSelectedClubNames(updatedNames);
         } else {
             // Remove club
             updatedClubs.splice(clubIndex, 1);
-            const updatedNames = { ...selectedClubNames };
-            delete updatedNames[clubId];
-            setSelectedClubNames(updatedNames);
         }
         
         setNewPromotion({ ...newPromotion, id_club: updatedClubs });
@@ -467,7 +460,7 @@ export default function CouponsPage() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{promotion.promotion_code}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {promotion.id_club && promotion.id_club.length > 0
-                                            ? promotion.id_club.map((clubId) => selectedClubNames[clubId] || clubId).join(', ')
+                                            ? promotion.id_club.map((clubId) => selectedClubNames[clubId] || 'Unknown Club').join(', ')
                                             : 'N/A'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
