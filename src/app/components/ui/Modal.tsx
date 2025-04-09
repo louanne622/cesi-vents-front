@@ -43,7 +43,7 @@ export default function Modal({
     <>
       {/* Overlay avec animation */}
       <div 
-        className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out z-50 ${
+        className={`custom-overlay transition-opacity duration-300 ease-in-out z-50 ${
           isVisible ? 'bg-opacity-40' : 'bg-opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
