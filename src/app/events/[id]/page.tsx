@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import {
   FaCalendar,
   FaMapMarkerAlt,
@@ -38,7 +40,11 @@ interface Event {
   updatedAt: string;
 }
 
-export default function EventDetailsPage({ params }: { params: { id: string } }) {
+export default function EventDetailsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { selectedEvent: event, status, error } = useSelector((state: RootState) => state.events);
