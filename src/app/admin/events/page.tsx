@@ -1,45 +1,46 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
 import { FaCalendarAlt, FaSearch, FaFilter, FaPlus } from 'react-icons/fa';
 import Button from '@/app/components/ui/Button';
+import { fetchEvents } from '@/redux/features/eventSlice';
+import { RootState, AppDispatch } from '@/redux/store';
 
-// Données de démonstration (à remplacer par des appels API)
-const mockEvents = [
-  {
-    id: 1,
-    title: 'Soirée Cinéma',
-    date: '2024-04-15',
-    location: 'Salle Polyvalente',
-    participants: 45,
-    status: 'active',
-    revenue: 225,
-  },
-  {
-    id: 2,
-    title: 'Tournoi de Football',
-    date: '2024-04-20',
-    location: 'Stade CESI',
-    participants: 32,
-    status: 'active',
-    revenue: 160,
-  },
-  {
-    id: 3,
-    title: 'Atelier Photo',
-    date: '2024-04-10',
-    location: 'Labo Photo',
-    participants: 15,
-    status: 'completed',
-    revenue: 75,
-  },
-];
+
 
 export default function AdminEventsPage() {
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  
+  const { events, status, error } = useSelector((state: RootState) => state.events);
 
-  const filteredEvents = mockEvents.filter(event => {
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchEvents());
+    }
+  }, [status, dispatch]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="text-xl">Chargement...</div>
+      </div>
+    );
+  }
+
+  if (status === 'failed') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="text-xl text-red-600">Erreur: {error}</div>
+      </div>
+    );
+  }
+
+  const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = selectedStatus === 'all' || event.status === selectedStatus;
     return matchesSearch && matchesStatus;
@@ -55,7 +56,7 @@ export default function AdminEventsPage() {
             color="primary"
             icon={<FaPlus />}
             iconPosition="left"
-            onClick={() => window.location.href = '/admin/events/create'}
+            onClick={() => router.push('/admin/events/create')}
           />
         </div>
 
@@ -84,8 +85,8 @@ export default function AdminEventsPage() {
                 className="pl-10 pr-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
               >
                 <option value="all">Tous les statuts</option>
-                <option value="active">En cours</option>
-                <option value="completed">Terminés</option>
+                <option value="published">Publiés</option>
+                <option value="draft">Brouillons</option>
                 <option value="cancelled">Annulés</option>
               </select>
             </div>
@@ -123,7 +124,7 @@ export default function AdminEventsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredEvents.map((event) => (
-                  <tr key={event.id} className="hover:bg-gray-50">
+                  <tr key={event._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -141,20 +142,20 @@ export default function AdminEventsPage() {
                       <div className="text-sm text-gray-900">{event.location}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{event.participants}</div>
+                      <div className="text-sm text-gray-900">{event.participants?.length || 0}/{event.maxCapacity}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{event.revenue}€</div>
+                      <div className="text-sm text-gray-900">{event.price}€</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        event.status === 'active'
+                        event.status === 'published'
                           ? 'bg-green-100 text-green-800'
-                          : event.status === 'completed'
-                          ? 'bg-blue-100 text-blue-800'
+                          : event.status === 'draft'
+                          ? 'bg-yellow-100 text-yellow-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {event.status === 'active' ? 'En cours' : event.status === 'completed' ? 'Terminé' : 'Annulé'}
+                        {event.status === 'published' ? 'Publié' : event.status === 'draft' ? 'Brouillon' : 'Annulé'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -162,7 +163,7 @@ export default function AdminEventsPage() {
                         text="Modifier"
                         color="secondary"
                         variant="outline"
-                        onClick={() => window.location.href = `/admin/events/${event.id}/edit`}
+                        onClick={() => router.push(`/admin/events/${event._id}/edit`)}
                       />
                     </td>
                   </tr>

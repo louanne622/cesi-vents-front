@@ -7,6 +7,18 @@ interface Participant {
   registrationDate: string;
 }
 
+type CreateEventData = {
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  maxCapacity: number;
+  price: number;
+  registrationDeadline: string;
+  status: 'draft' | 'published' | 'cancelled';
+};
+
 interface Event {
   _id: string;
   title: string;
@@ -38,6 +50,19 @@ const initialState: EventState = {
   error: null
 };
 
+// Créer un nouvel événement
+export const createEvent = createAsyncThunk(
+  'events/createEvent',
+  async (eventData: CreateEventData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('/events/create', eventData);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Erreur inconnue";
+      return rejectWithValue(message);
+    }
+  }
+);
 
 // Récupérer tous les événements
 export const fetchEvents = createAsyncThunk('events/fetchEvents', async (_, { rejectWithValue }) => {
