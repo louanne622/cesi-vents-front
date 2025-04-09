@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaBell, FaCog, FaSignOutAlt } from "react-icons/fa";
+import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaCog, FaSignOutAlt } from "react-icons/fa";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { clearAuth } from "@/redux/features/authSlice";
+import { clearAuth, getProfile } from "@/redux/features/authSlice";
 import { clearTokens } from "@/utils/cookieService";
+import { RootState } from "@/redux/store";
+import { useEffect } from "react";
 
 
 const Navbar = () => {
@@ -14,6 +16,30 @@ const Navbar = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { token, error: authError } = useAppSelector((state) => state.auth);
+  const currentUser = useAppSelector((state: RootState) => state.auth.profile);
+
+  // Ajout de console.log pour déboguer
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (token) {
+        try {
+          console.log("Fetching profile...");
+          await dispatch(getProfile()).unwrap();
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+        }
+      }
+    };
+
+    fetchProfile();
+  }, [dispatch, token]);
+
+  useEffect(() => {
+    if (currentUser) {
+      console.log("✅ currentUser is ready:", currentUser);
+    }
+  }, [currentUser]);
+
   const handleLogout = () => {
     clearTokens();
     dispatch(clearAuth());
@@ -23,7 +49,7 @@ const Navbar = () => {
   const navItems = [
     {
       href: "/",
-      label: "Accueil",
+      label: "Accueil", 
       icon: FaHome,
     },
     {
@@ -32,7 +58,7 @@ const Navbar = () => {
       icon: FaUsers,
     },
     {
-      href: "/events",
+      href: "/events", 
       label: "Événements",
       icon: FaCalendarAlt,
     },
@@ -42,6 +68,14 @@ const Navbar = () => {
       icon: FaUser,
     },
   ];
+
+  if (currentUser?.role === "admin") {
+    navItems.push({
+      href: "/admin/dashboard",
+      label: "Dashboard",
+      icon: FaUsers,
+    });
+  }
 
   return (
     <>
@@ -70,7 +104,6 @@ const Navbar = () => {
 
       {/* Version desktop - Sidebar */}
       <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 z-50 flex-col">
-        {/* Logo et titre - Modifié pour être plus grand et centré */}
         <div className="border-b border-gray-200 flex flex-col items-center">
           <Link href="/" className="flex flex-col items-center space-y-4">
             <Image
