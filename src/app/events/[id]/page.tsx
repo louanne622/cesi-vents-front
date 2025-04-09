@@ -40,11 +40,15 @@ interface Event {
   updatedAt: string;
 }
 
+interface EventDetailsPageProps {
+  params: {
+    id: string;
+  };
+}
+
 export default function EventDetailsPage({
   params,
-}: {
-  params: { id: string };
-}) {
+}: EventDetailsPageProps) {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { selectedEvent: event, status, error } = useSelector((state: RootState) => state.events);
@@ -72,7 +76,7 @@ export default function EventDetailsPage({
     );
   }
 
-  const confirmedParticipants = event.participants.filter(p => p.status === 'confirmed').length;
+  const confirmedParticipants = event.participants.filter((p: { status: string }) => p.status === 'confirmed').length;
 
   return (
     <div className="min-h-screen bg-gray-50">
