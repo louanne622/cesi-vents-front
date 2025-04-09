@@ -7,6 +7,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     club: clubReducer,
+
     user: userReducer,
   },
   middleware: (getDefaultMiddleware) =>
