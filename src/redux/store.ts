@@ -4,7 +4,7 @@ import clubReducer from './features/clubSlice';
 import eventsReducer from './features/eventSlice';
 import userReducer from './features/userSlice';
 import promotionsReducer from './features/promotionSlice';
-
+import ticketReducer from './features/ticketSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,7 +12,8 @@ export const store = configureStore({
     club: clubReducer,
     events: eventsReducer,
     user: userReducer,
-    promotions: promotionsReducer
+    promotions: promotionsReducer,
+    ticket: ticketReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
