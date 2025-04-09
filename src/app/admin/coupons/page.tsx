@@ -1,25 +1,16 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { getAllPromotions, createPromotion, deactivatePromotion, activatePromotion, deletePromotion } from '@/redux/features/promotionSlice';
-import { getAllClubs } from '@/redux/features/clubSlice';
 import { getAllClubs } from '@/redux/features/clubSlice';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import { FaEye, FaTrash, FaChevronDown, FaCheck } from 'react-icons/fa';
-import { FaEye, FaTrash, FaChevronDown, FaCheck } from 'react-icons/fa';
 import Modal from '@/app/components/ui/Modal';
 import Button from '@/app/components/ui/Button';
-import axiosInstance from '@/utils/axiosConfig';
-
-interface Club {
-    _id: string;
-    name: string;
-}
 import axiosInstance from '@/utils/axiosConfig';
 
 interface Club {
@@ -32,7 +23,6 @@ interface Promotion {
     promotion_code: string;
     validation_date: string;
     max_use: number;
-    id_club: string[] | null;
     id_club: string[] | null;
     activate: boolean;
     value: number;
@@ -50,28 +40,16 @@ export default function CouponsPage() {
     const { promotions, loading, error } = useSelector((state: RootState) => state.promotions);
     const { clubs: storeClubs, loading: clubsLoading, error: clubError } = useSelector((state: RootState) => state.club);
     const [clubs, setClubs] = useState<Club[]>([]);
-    const { clubs: storeClubs, loading: clubsLoading, error: clubError } = useSelector((state: RootState) => state.club);
-    const [clubs, setClubs] = useState<Club[]>([]);
     const [newPromotion, setNewPromotion] = useState({
         promotion_code: '',
         validation_date: '',
         max_use: 0,
-        id_club: [] as string[],
         id_club: [] as string[],
         value: 0
     });
     const [maxUsePreset, setMaxUsePreset] = useState<string>('custom');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [promotionToDelete, setPromotionToDelete] = useState<PromotionInfoForDeletion | null>(null);
-    const [validationErrors, setValidationErrors] = useState({
-        promotion_code: false,
-        validation_date: false,
-        max_use: false,
-        value: false
-    });
-    const [isClubDropdownOpen, setIsClubDropdownOpen] = useState(false);
-    const clubDropdownRef = useRef<HTMLDivElement>(null);
-    const [selectedClubNames, setSelectedClubNames] = useState<Record<string, string>>({});
     const [validationErrors, setValidationErrors] = useState({
         promotion_code: false,
         validation_date: false,
@@ -98,6 +76,20 @@ export default function CouponsPage() {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
+        console.log('Dispatching getAllClubs action');
+        dispatch(getAllClubs());
+        
+        // Add click outside listener to close dropdown
+        const handleClickOutside = (event: MouseEvent) => {
+            if (clubDropdownRef.current && !clubDropdownRef.current.contains(event.target as Node)) {
+                setIsClubDropdownOpen(false);
+            }
+        };
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
     }, [dispatch]);
 
     useEffect(() => {
@@ -106,10 +98,12 @@ export default function CouponsPage() {
             console.log('Setting clubs with length:', storeClubs.length);
             setClubs(storeClubs);
             
-            // Update selectedClubNames with all club names
+            // Update selectedClubNames with existing club names
             const clubNames: Record<string, string> = {};
             storeClubs.forEach((club: Club) => {
-                clubNames[club._id] = club.name;
+                if (newPromotion.id_club.includes(club._id)) {
+                    clubNames[club._id] = club.name;
+                }
             });
             setSelectedClubNames(clubNames);
         }
@@ -164,8 +158,42 @@ export default function CouponsPage() {
         setValidationErrors(newErrors);
 
         if (hasError) {
+        
+        // Reset validation errors
+        setValidationErrors({
+            promotion_code: false,
+            validation_date: false,
+            max_use: false,
+            value: false
+        });
+
+        let hasError = false;
+        const newErrors = { ...validationErrors };
+
+        if (!newPromotion.promotion_code) {
+            newErrors.promotion_code = true;
+            hasError = true;
+        }
+        if (!newPromotion.validation_date) {
+            newErrors.validation_date = true;
+            hasError = true;
+        }
+        if ((maxUsePreset === 'custom' && newPromotion.max_use <= 0) || 
+            (maxUsePreset !== 'custom' && !PRESETS.includes(maxUsePreset))) {
+            newErrors.max_use = true;
+            hasError = true;
+        }
+        if (newPromotion.value <= 0 || newPromotion.value > 100) {
+            newErrors.value = true;
+            hasError = true;
+        }
+
+        setValidationErrors(newErrors);
+
+        if (hasError) {
             return;
         }
+
 
         try {
             await dispatch(createPromotion({ 
@@ -173,7 +201,13 @@ export default function CouponsPage() {
                 validation_date: newPromotion.validation_date || null,
                 id_club: newPromotion.id_club || null 
             })).unwrap();
+            await dispatch(createPromotion({ 
+                ...newPromotion, 
+                validation_date: newPromotion.validation_date || null,
+                id_club: newPromotion.id_club || null 
+            })).unwrap();
             toast.success('Promotion créée avec succès');
+            setNewPromotion({ promotion_code: '', validation_date: '', max_use: 0, id_club: [], value: 0 });
             setNewPromotion({ promotion_code: '', validation_date: '', max_use: 0, id_club: [], value: 0 });
             setMaxUsePreset('custom');
             dispatch(getAllPromotions());
@@ -230,9 +264,14 @@ export default function CouponsPage() {
         if (clubIndex === -1) {
             // Add club
             updatedClubs.push(clubId);
+            const updatedNames = { ...selectedClubNames, [clubId]: clubName };
+            setSelectedClubNames(updatedNames);
         } else {
             // Remove club
             updatedClubs.splice(clubIndex, 1);
+            const updatedNames = { ...selectedClubNames };
+            delete updatedNames[clubId];
+            setSelectedClubNames(updatedNames);
         }
         
         setNewPromotion({ ...newPromotion, id_club: updatedClubs });
@@ -442,72 +481,70 @@ export default function CouponsPage() {
                 </div>
 
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Club</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'expiration</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valeur (%)</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisations max</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Club</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'expiration</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valeur (%)</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisations max</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {promotions && promotions.length > 0 ? promotions.map((promotion: Promotion) => (
+                                <tr key={promotion._id}>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{promotion.promotion_code}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {promotion.id_club && promotion.id_club.length > 0
+                                            ? promotion.id_club.map((clubId) => selectedClubNames[clubId] || clubId).join(', ')
+                                            : 'N/A'}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {promotion.validation_date ? format(new Date(promotion.validation_date), 'dd MMMM yyyy', { locale: fr }) : 'Permanente'}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{promotion.value}%</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{promotion.max_use}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                            promotion.activate ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                        }`}>
+                                            {promotion.activate ? 'Actif' : 'Inactif'}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center space-x-2">
+                                        <button
+                                            onClick={() => handleToggleActivate(promotion._id, promotion.activate)}
+                                            className={`px-3 rounded-md text-white flex items-center justify-center h-8 ${ 
+                                                promotion.activate 
+                                                    ? 'bg-yellow-500 hover:bg-yellow-600'
+                                                    : 'bg-green-500 hover:bg-green-600'
+                                            }`}
+                                            disabled={loading}
+                                            title={promotion.activate ? 'Désactiver' : 'Activer'}
+                                        >
+                                            {promotion.activate ? 'Désactiver' : 'Activer'}
+                                        </button>
+                                        <Button
+                                            text=""
+                                            color="secondary"
+                                            variant="outline"
+                                            size="sm"
+                                            icon={<FaTrash />}
+                                            onClick={() => handleDeletePromotion(promotion._id, promotion.promotion_code)}
+                                            className="flex items-center justify-center w-8 h-8"
+                                        />
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {promotions && promotions.length > 0 ? promotions.map((promotion: Promotion) => (
-                                    <tr key={promotion._id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{promotion.promotion_code}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {promotion.id_club && promotion.id_club.length > 0
-                                                ? promotion.id_club.map((clubId) => selectedClubNames[clubId] || 'Unknown Club').join(', ')
-                                                : 'N/A'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {promotion.validation_date ? format(new Date(promotion.validation_date), 'dd MMMM yyyy', { locale: fr }) : 'Permanente'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{promotion.value}%</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{promotion.max_use}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                promotion.activate ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                            }`}>
-                                                {promotion.activate ? 'Actif' : 'Inactif'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center space-x-2">
-                                            <button
-                                                onClick={() => handleToggleActivate(promotion._id, promotion.activate)}
-                                                className={`px-3 rounded-md text-white flex items-center justify-center h-8 ${ 
-                                                    promotion.activate 
-                                                        ? 'bg-yellow-500 hover:bg-yellow-600'
-                                                        : 'bg-green-500 hover:bg-green-600'
-                                                }`}
-                                                disabled={loading}
-                                                title={promotion.activate ? 'Désactiver' : 'Activer'}
-                                            >
-                                                {promotion.activate ? 'Désactiver' : 'Activer'}
-                                            </button>
-                                            <Button
-                                                text=""
-                                                color="danger"
-                                                variant="outline"
-                                                size="sm"
-                                                icon={<FaTrash />}
-                                                onClick={() => handleDeletePromotion(promotion._id, promotion.promotion_code)}
-                                                className="flex items-center justify-center w-8 h-8"
-                                            />
-                                        </td>
-                                    </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan={7} className="text-center py-4">Aucune promotion trouvée.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                            )) : (
+                                <tr>
+                                    <td colSpan={7} className="text-center py-4">Aucune promotion trouvée.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
