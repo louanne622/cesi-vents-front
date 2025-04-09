@@ -38,7 +38,7 @@ export default function EventsPage() {
   const { events, status, error } = useSelector((state: RootState) => state.events);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Tous");
+
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
 
   const categories = ["Tous", "Social", "Gaming", "Formation"];
@@ -60,12 +60,8 @@ export default function EventsPage() {
     }
 
     setFilteredEvents(result);
-  }, [events, selectedCategory, searchTerm]);
+  }, [events, searchTerm]);
 
-  const handleResetFilters = () => {
-    setSearchTerm("");
-    setSelectedCategory("Tous");
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -94,23 +90,6 @@ export default function EventsPage() {
           </button>
         </div>
 
-        {/* Catégories */}
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === category
-                  ? 'bg-yellow-400 text-gray-900'
-                  : 'bg-white text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-
         {/* Contenu des événements */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {status === 'loading' && (
@@ -129,12 +108,6 @@ export default function EventsPage() {
           {status === 'succeeded' && filteredEvents.length === 0 && (
             <div className="col-span-full text-center py-16">
               <p className="text-gray-500 text-lg">Aucun événement ne correspond à vos critères.</p>
-              <button
-                onClick={handleResetFilters}
-                className="mt-4 px-4 py-2 bg-[#fbe216] text-gray-800 rounded-lg hover:bg-[#e6cf14] transition-colors"
-              >
-                Réinitialiser les filtres
-              </button>
             </div>
           )}
 
