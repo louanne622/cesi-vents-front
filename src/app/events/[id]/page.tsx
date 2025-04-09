@@ -87,7 +87,7 @@ export default function EventDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-20">
       <div className="container mx-auto px-4 py-8">
         {/* En-tête avec bouton retour */}
         <div className="flex items-center mb-8">

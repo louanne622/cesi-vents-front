@@ -116,7 +116,7 @@ export default function EventRegistrationPage() {
 
             <div className="bg-gray-50 p-6 rounded-lg mb-8">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Récapitulatif</h2>
-              <div className="space-y-3 text-left">
+              <div className="space-y-3 text-left text-gray-900">
                 <p><span className="font-medium">Événement :</span> {event.title}</p>
                 <p><span className="font-medium">Date :</span> {event.date.day} {event.date.month} à {event.time}</p>
                 <p><span className="font-medium">Lieu :</span> {event.location}</p>
@@ -144,7 +144,7 @@ export default function EventRegistrationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-20">
       <div className="container mx-auto px-4 py-8">
         {/* En-tête avec bouton retour */}
         <div className="flex items-center mb-8">
@@ -189,76 +189,71 @@ export default function EventRegistrationPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Prénom *
+                  Prénom
                 </label>
                 <input
                   type="text"
                   id="firstName"
                   name="firstName"
-                  required
                   value={userInfo.firstName}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                  readOnly
+                  className="w-full px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed"
                 />
               </div>
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nom *
+                  Nom
                 </label>
                 <input
                   type="text"
                   id="lastName"
                   name="lastName"
-                  required
                   value={userInfo.lastName}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                  readOnly
+                  className="w-full px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed"
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email *
+                Email
               </label>
               <input
                 type="email"
                 id="email"
                 name="email"
-                required
                 value={userInfo.email}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                readOnly
+                className="w-full px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed"
               />
             </div>
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Téléphone *
+                Téléphone
               </label>
               <input
                 type="tel"
                 id="phone"
                 name="phone"
-                required
                 value={userInfo.phone}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                readOnly
+                className="w-full px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed"
               />
             </div>
 
             <div>
               <label htmlFor="studentId" className="block text-sm font-medium text-gray-700 mb-1">
-                Numéro étudiant *
+                Numéro étudiant
               </label>
               <input
                 type="text"
                 id="studentId"
                 name="studentId"
-                required
                 value={userInfo.studentId}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                readOnly
+                className="w-full px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed"
               />
             </div>
 
