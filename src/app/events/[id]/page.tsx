@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   FaCalendar,
   FaMapMarkerAlt,
@@ -14,6 +14,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { fetchEventById } from '@/redux/features/eventSlice';
+import React from 'react';
 
 interface Participant {
   userId: string;
@@ -38,20 +39,19 @@ interface Event {
   updatedAt: string;
 }
 
-export default function EventDetailsPage() {
-  const { id } = useParams();            // <-- retrieve [id] here
+interface PageParams {
+  id: string;
+}
+
+export default function EventDetailsPage({ params }: { params: Promise<PageParams> }) {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const { selectedEvent: event, status, error } = useSelector(
-    (state: RootState) => state.events
-  );
+  const { selectedEvent: event, status, error } = useSelector((state: RootState) => state.events);
+  const resolvedParams = React.use(params);
 
   useEffect(() => {
-    if (id) {
-      const eventId = Array.isArray(id) ? id[0] : id;
-      dispatch(fetchEventById(eventId));
-    }
-  }, [dispatch, id]);
+    dispatch(fetchEventById(resolvedParams.id));
+  }, [dispatch, resolvedParams.id]);
 
   if (status === 'loading') {
     return (
