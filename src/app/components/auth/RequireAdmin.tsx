@@ -9,25 +9,20 @@ import { getProfile } from "@/redux/features/authSlice";
 export default function RequireAdmin({ children }: { children: ReactNode }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const currentUser = useAppSelector((state) => state.auth.profile);
+  const { profile: currentUser, isLoading } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     const check = async () => {
-      if (!currentUser) {
-        try {
-          await dispatch(getProfile()).unwrap();
-        } catch {
-          router.push("/");
-        }
-      } else if (currentUser.role !== "admin") {
-        router.push("/unauthorized");
-      }
-    };
+      if (!currentUser && !isLoading) 
+          await dispatch(getProfile());
+    }
+}, [currentUser, dispatch, isLoading]);
 
-    check();
-  }, [currentUser, dispatch, router]);
-
-  if (!currentUser || currentUser.role !== "admin") return null;
+useEffect(() => {
+  if (currentUser && currentUser.role !== "admin") {
+    router.push("/unauthorized");
+  }
+}, [currentUser, router]);
 
   return <>{children}</>;
 }
