@@ -5,10 +5,11 @@ import { FaUser, FaPlus, FaEye, FaTrash, FaPencilAlt } from 'react-icons/fa';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import FilterBar from '@/components/ui/FilterBar';
-import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { useAppDispatch} from '@/redux/hooks';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { deleteUser, getAllUsers, getUserById, User } from '@/redux/features/userSlice';
+import { deleteUser, getAllUsers, getUserById} from '@/redux/features/userSlice';
+import { User } from '@/app/types/User';
 
 
 export default function AdminUsersPage() {
@@ -93,7 +94,8 @@ export default function AdminUsersPage() {
       value: selectedRole,
       options: [
         { value: 'admin', label: 'Administrateur' },
-        { value: 'user', label: 'Utilisateur' }
+        { value: 'user', label: 'Utilisateur' },
+        { value: 'clubLeader', label: 'Représentant de club' }
       ],
       onChange: setSelectedRole,
     },
@@ -178,7 +180,7 @@ export default function AdminUsersPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {user.role === 'admin' ? 'Administrateur' :
-                         user.role === 'moderator' ? 'Modérateur' :
+                         user.role === 'clubLeader' ? 'Représentant de club' :
                          'Utilisateur'}
                       </div>
                     </td>

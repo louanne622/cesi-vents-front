@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaUser } from 'react-icons/fa';
 import Button from '../../../components/ui/Button';
-import { useAppDispatch } from '@/redux/hooks';
+import { useAppDispatch} from '@/redux/hooks';
 import { toast } from 'react-hot-toast';
 import { UserCreatePayload } from '@/app/types/User';
 import { addUser } from '@/redux/features/userSlice';
@@ -13,6 +13,7 @@ export default function CreateUserPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
+
   
   const [userData, setUserData] = useState<UserCreatePayload>({
     first_name: '',
@@ -42,7 +43,7 @@ export default function CreateUserPage() {
       };
 
       console.log("Data envoyée au backend :", userDataToSend);
-      await dispatch(addUser(userDataToSend)).unwrap();
+      const result = await dispatch(addUser(userDataToSend)).unwrap();
       toast.success("Utilisateur créé avec succès !");
       router.push('/admin/users');
     } catch (error: any) {
@@ -171,11 +172,9 @@ export default function CreateUserPage() {
               >
                 <option value="">Sélectionner un rôle</option>
                 <option value="user">Utilisateur</option>
-                <option value="moderator">Modérateur</option>
                 <option value="admin">Administrateur</option>
               </select>
             </div>
-
             <div>
               <label htmlFor="campus" className="block text-sm font-medium text-gray-700 mb-1">
                 Campus

@@ -5,12 +5,13 @@ export interface User {
     email: string;
     phone?: string;
     campus: string;
-    role: "user" | "admin" | "clubleader";
-    avatar?: { url: string; alt: string };
+    role: "user" | "admin" | "clubLeader";
+    avatar?: string;
     bde_member?: boolean;
     password: string;
     createdAt: string;
     updatedAt: string;
+    clubId?: string;
 }
 
 export interface UserCreatePayload {
@@ -20,7 +21,8 @@ export interface UserCreatePayload {
     password: string;
     phone?: string;
     campus: string;
-    role: "user" | "admin" | "clubleader";
+    role: "user" | "admin" | "clubLeader";
+    clubId?: string;
     bde_member?: boolean;
 }
 
@@ -31,7 +33,8 @@ export interface UserUpdatePayload {
     password?: string;
     phone?: string;
     campus?: string;
-    role?: "user" | "admin" | "clubleader";
+    role?: "user" | "admin" | "clubLeader";
     bde_member?: boolean;
+    clubId?: string;
 }
 

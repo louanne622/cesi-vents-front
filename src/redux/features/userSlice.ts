@@ -1,20 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosConfig";
-import { UserCreatePayload, UserUpdatePayload } from "@/app/types/User";
-
-export interface User {
-    _id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    role: string;
-    avatar?: string;
-    bde_member: boolean;
-    phone: string;
-    campus: string;
-    createdAt: string;
-    updatedAt: string;
-}
+import { User, UserCreatePayload, UserUpdatePayload } from "@/app/types/User";
 
 
 
@@ -93,6 +79,20 @@ export const deleteUser = createAsyncThunk(
         return rejectWithValue(error.response?.data?.message || "Erreur serveur");
     }
 });
+
+// Assign club to user
+export const assignClubToUser = createAsyncThunk(
+    "users/assignClubToUser",
+    async ({ userId, clubId }: { userId: string, clubId: string }, { rejectWithValue }) => {
+        try {   
+            const response = await axiosInstance.put(`/auth/assignClub/${userId}`, { clubId });
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Erreur serveur");
+        }
+    }
+);
+
 
 const userSlice = createSlice({
     name: 'user',

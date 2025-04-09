@@ -5,15 +5,20 @@ import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaUser, FaLock } from 'react-icons/fa';
 import Button from '@/app/components/ui/Button';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { getUserById, updateUser } from '@/redux/features/userSlice';
+import { assignClubToUser, getUserById, updateUser } from '@/redux/features/userSlice';
 import { toast } from 'react-hot-toast';
-
+import { getAllClubs } from '@/redux/features/clubSlice';
 export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: userId } = use(params);
+  const clubs = useAppSelector((state) => state.club.clubs);
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { currentUser, loading, error } = useAppSelector((state) => state.user);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    dispatch(getAllClubs());
+  }, [dispatch]);
 
   const [formData, setFormData] = useState({
     first_name: '',
@@ -25,6 +30,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
     confirmPassword: '',
     bde_member: false,
     role: 'user',
+    clubId: '',
   });
 
   useEffect(() => {
@@ -46,11 +52,12 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
         last_name: currentUser.last_name,
         email: currentUser.email,
         role: currentUser.role,
-        phone: currentUser.phone,
+        phone: currentUser.phone || '',
         campus: currentUser.campus,
-        bde_member: currentUser.bde_member,
+        bde_member: currentUser.bde_member || false,
         password: '',
         confirmPassword: '',
+        clubId: currentUser.clubId || '',
       });
     }
   }, [currentUser]);
@@ -85,11 +92,17 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
         phone: formData.phone,
         campus: formData.campus,
         bde_member: formData.bde_member,
-        role: formData.role as "user" | "admin" | "clubleader",
+        role: formData.role as "user" | "admin" | "clubLeader",
         ...(formData.password && { password: formData.password }),
       };
 
       await dispatch(updateUser({ id: userId, data: UserDataToSend })).unwrap();
+
+      if (formData.role === 'clubLeader' && formData.clubId) {
+        await dispatch(assignClubToUser({ userId: userId, clubId: formData.clubId })).unwrap();
+      }
+
+      console.log(formData);
       toast.success('Utilisateur mis à jour avec succès');
       router.push('/admin/users');
     } catch (error: any) {
@@ -303,9 +316,29 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
               >
                 <option value="user">Utilisateur</option>
                 <option value="admin">Administrateur</option>
-                <option value="clubleader">Club Leader</option>
+                <option value="clubLeader">Club Leader</option>
               </select>
             </div>
+            {formData.role === 'clubLeader' && (
+              <div>
+                <label htmlFor="clubId" className="block text-sm font-medium text-gray-700 mb-1">
+                  Club à assigner
+                </label>
+                <select
+                  id="clubId"
+                  name="clubId"
+                  value={formData.clubId}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
+                  required
+                >
+                  <option value="">Sélectionner un club</option>
+                  {clubs.map((club) => (
+                    <option key={club._id} value={club._id}>{club.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* BDE Member */}
             <div className="flex items-center">
