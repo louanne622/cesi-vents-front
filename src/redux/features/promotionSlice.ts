@@ -7,7 +7,7 @@ interface Promotion {
     promotion_code: string;
     validation_date: string;
     max_use: number;
-    id_club: string;
+    id_club: string[] | null;
     activate: boolean;
     value: number;
 }
@@ -29,7 +29,13 @@ const initialState: PromotionState = {
 // Créer une promotion
 export const createPromotion = createAsyncThunk(
     "promotions/createPromotion",
-    async ({ promotion_code, validation_date, max_use, id_club, value }: { promotion_code: string, validation_date: string | null, max_use: number, id_club: string, value: number }, { rejectWithValue }) => {
+    async ({ promotion_code, validation_date, max_use, id_club, value }: { 
+        promotion_code: string, 
+        validation_date: string | null, 
+        max_use: number, 
+        id_club: string[] | null, 
+        value: number 
+    }, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.post("/promotion/create", {
                 promotion_code,
