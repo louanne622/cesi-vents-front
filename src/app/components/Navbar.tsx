@@ -2,9 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaCog, FaSignOutAlt, FaMoneyBillWave, FaTicketAlt, FaMoneyBillWave, FaTicketAlt } from "react-icons/fa";
-import { MdEventNote } from 'react-icons/md';
-import { GiClubs } from 'react-icons/gi';
+import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaCog, FaSignOutAlt, FaMoneyBillWave, FaTicketAlt } from "react-icons/fa";
 import { MdEventNote } from 'react-icons/md';
 import { GiClubs } from 'react-icons/gi';
 import Image from "next/image";
@@ -113,39 +111,6 @@ const Navbar = () => {
       icon: FaUsers,
     });
   }
-
-  const adminNavItems = [
-    {
-      href: "/admin/dashboard",
-      label: "Tableau de bord",
-      icon: FaHome,
-    },
-    {
-      href: "/admin/users",
-      label: "Utilisateurs",
-      icon: FaUsers,
-    },
-    {
-      href: "/admin/clubs",
-      label: "Clubs",
-      icon: GiClubs,
-    },
-    {
-      href: "/admin/events",
-      label: "Événements",
-      icon: MdEventNote,
-    },
-    {
-      href: "/admin/finances",
-      label: "Finances",
-      icon: FaMoneyBillWave,
-    },
-    {
-      href: "/admin/coupons",
-      label: "Coupons",
-      icon: FaTicketAlt,
-    },
-  ];
 
   return (
     <>
