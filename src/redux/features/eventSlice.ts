@@ -19,8 +19,7 @@ type CreateEventData = {
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
   availableTickets: number;
-  availableTickets: number;
-};
+  };
 
 interface Event {
   _id: string;
@@ -37,7 +36,6 @@ interface Event {
   createdAt: string;
   clubId: string;
   updatedAt: string;
-  availableTickets: number;
   availableTickets: number;
 }
 
