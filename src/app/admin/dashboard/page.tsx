@@ -9,9 +9,9 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-gray-50 pb-20">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-8 text-gray-800">Tableau de bord administrateur</h1>
+        <h1 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-gray-800">Tableau de bord administrateur</h1>
 
-        <div className="grid grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
             <DashboardButton 
                 title="Utilisateurs"
                 href="/admin/users"

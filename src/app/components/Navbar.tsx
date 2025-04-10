@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaCog, FaSignOutAlt, FaMoneyBillWave, FaTicketAlt } from "react-icons/fa";
+import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaCog, FaSignOutAlt, FaMoneyBillWave, FaTicketAlt, FaChartLine } from "react-icons/fa";
 import { MdEventNote } from 'react-icons/md';
 import { GiClubs } from 'react-icons/gi';
 import Image from "next/image";
@@ -57,7 +57,7 @@ const Navbar = () => {
     {
       href: "/clubs",
       label: "Clubs",
-      icon: FaUsers,
+      icon: GiClubs,
     },
     {
       href: "/events", 
@@ -69,13 +69,18 @@ const Navbar = () => {
       label: "Profil",
       icon: FaUser,
     },
+    {
+      href: "/admin/dashboard",
+      label: "Dashboard",
+      icon: FaChartLine,
+    }
   ];
 
   const adminNavItems = [
     {
       href: "/admin/dashboard",
       label: "Tableau de bord",
-      icon: FaHome,
+      icon: FaChartLine,
     },
     {
       href: "/admin/users",
@@ -104,14 +109,6 @@ const Navbar = () => {
     },
   ];
 
-  if (currentUser?.role === "admin") {
-    navItems.push({
-      href: "/admin/dashboard",
-      label: "Dashboard",
-      icon: FaUsers,
-    });
-  }
-
   if (currentUser?.role === "clubleader") {
     navItems.push({
       href: "/clubleader",
@@ -125,7 +122,7 @@ const Navbar = () => {
       {/* Version mobile nav */}
       <nav className="fixed md:hidden bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
         <div className="flex justify-around items-center h-16">
-          {(pathname.startsWith('/admin') ? adminNavItems : (pathname.startsWith('/admin') ? adminNavItems : navItems)).map((item) => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link 
@@ -163,7 +160,7 @@ const Navbar = () => {
         {/* Menu principal */}
         <div className="flex-1 py-8 px-4"> {/* Augmenté le padding vertical */}
           <div className="space-y-2">
-            {(pathname.startsWith('/admin') ? adminNavItems : (pathname.startsWith('/admin') ? adminNavItems : navItems)).map((item) => {
+            {(pathname.startsWith('/admin') ? adminNavItems : navItems).map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
