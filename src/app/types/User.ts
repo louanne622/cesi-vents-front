@@ -7,6 +7,7 @@ export interface User {
     campus: string;
     role: "user" | "admin" | "clubleader";
     avatar?: { url: string; alt: string };
+    clubId?: string;
     bde_member?: boolean;
     password: string;
     createdAt: string;
@@ -33,5 +34,6 @@ export interface UserUpdatePayload {
     campus?: string;
     role?: "user" | "admin" | "clubleader";
     bde_member?: boolean;
+    clubId?: string;
 }
 

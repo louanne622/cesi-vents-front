@@ -8,7 +8,8 @@ import FilterBar from '@/components/ui/FilterBar';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { deleteUser, getAllUsers, getUserById, User } from '@/redux/features/userSlice';
+import { deleteUser, getAllUsers, getUserById} from '@/redux/features/userSlice';
+import { User } from '@/app/types/User';
 
 
 export default function AdminUsersPage() {
@@ -93,7 +94,8 @@ export default function AdminUsersPage() {
       value: selectedRole,
       options: [
         { value: 'admin', label: 'Administrateur' },
-        { value: 'user', label: 'Utilisateur' }
+        { value: 'user', label: 'Utilisateur' },
+        { value: 'clubleader', label: 'Club Leader' }
       ],
       onChange: setSelectedRole,
     },
@@ -157,7 +159,7 @@ export default function AdminUsersPage() {
                         <div className="flex-shrink-0 h-10 w-10">
                           {user.avatar ? (
                             <img
-                              src={user.avatar}
+                              src={user.avatar.url}
                               alt={`${user.first_name} ${user.last_name}`}
                               className="h-10 w-10 rounded-full object-cover"
                             />
@@ -178,7 +180,7 @@ export default function AdminUsersPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {user.role === 'admin' ? 'Administrateur' :
-                         user.role === 'moderator' ? 'Modérateur' :
+                         user.role === 'clubleader' ? 'Club Leader' :
                          'Utilisateur'}
                       </div>
                     </td>
@@ -194,7 +196,7 @@ export default function AdminUsersPage() {
                       />
                       <Button
                         text=""
-                        color="danger"
+                        color="secondary"
                         variant="outline"
                         size="sm"
                         icon={<FaTrash />}

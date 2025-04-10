@@ -11,6 +11,7 @@ type CreateEventData = {
   title: string;
   description: string;
   date: string;
+  clubId: string;
   time: string;
   location: string;
   maxCapacity: number;
@@ -33,6 +34,7 @@ interface Event {
   createdBy: string;
   participants: Participant[];
   createdAt: string;
+  clubId: string;
   updatedAt: string;
 }
 
@@ -76,6 +78,20 @@ export const fetchEvents = createAsyncThunk('events/fetchEvents', async (_, { re
     return rejectWithValue('Erreur lors de la récupération des événements');
   }
 });
+
+// Récupérer tous les événements d'un club
+export const fetchClubEvents = createAsyncThunk(
+  'events/fetchClubEvents',
+  async ({ clubId }: { clubId: string }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/events/getAllClubEvents/${clubId}`);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Erreur inconnue";
+      return rejectWithValue(message);
+    }
+  }
+);
 
 // Récupérer un événement par son ID
 export const fetchEventById = createAsyncThunk(

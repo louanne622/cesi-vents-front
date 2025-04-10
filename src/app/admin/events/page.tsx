@@ -157,7 +157,7 @@ export default function AdminEventsPage() {
                         icon={<FaTrash />}
                         size="sm"
                         variant="outline"
-                        color="danger"
+                        color="secondary" 
                         onClick={() => handleDeleteClick(event._id)}
                         className="w-8 h-8"
                       />

@@ -7,6 +7,7 @@ import Button from '../ui/Button';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { getClubById, getClubByName } from '@/redux/features/clubSlice';
 import { toast } from 'react-hot-toast';
+import { assignClubToUser } from '@/redux/features/userSlice';
 
 interface ClubDetailsProps {
   clubId?: string;
@@ -17,6 +18,7 @@ interface ClubDetailsProps {
 export default function ClubDetails({ clubId, clubName, onBack }: ClubDetailsProps) {
   const dispatch = useAppDispatch();
   const { currentClub, loading, error } = useAppSelector((state) => state.club);
+  const { profile: currentUser } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     // Ne récupérer les données que si le club n'est pas déjà chargé
@@ -137,7 +139,20 @@ export default function ClubDetails({ clubId, clubName, onBack }: ClubDetailsPro
             <Button
               text="Rejoindre le club"
               color="primary"
-              onClick={() => {}}
+              onClick={async () => {
+                try {
+                  const result = await dispatch(assignClubToUser({
+                    userId: currentUser._id, 
+                    clubId: currentClub._id
+                  })).unwrap();
+                  if (result) {
+                    toast.success('Vous avez rejoint le club avec succès!');
+                  }
+                } catch (error: any) {
+                  toast.error(error.message || 'Une erreur est survenue lors de l\'inscription au club');
+                  console.error(error);
+                }
+              }}
             />
             <Button
               text="Voir les événements"

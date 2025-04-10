@@ -1,22 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosConfig";
 import { UserCreatePayload, UserUpdatePayload } from "@/app/types/User";
-
-export interface User {
-    _id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    role: string;
-    avatar?: string;
-    bde_member: boolean;
-    phone: string;
-    campus: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
-
+import { User } from "@/app/types/User";
 
 interface UserState {
     users: User[];
@@ -25,7 +10,6 @@ interface UserState {
     error: string | null;
 }
 
-// Get all users
 export const getAllUsers = createAsyncThunk("users/getAllUsers", async (_: void, { rejectWithValue }: { rejectWithValue: (value: any) => any }) => {
     try {
         const response = await axiosInstance.get("/auth/getAllUsers");
@@ -49,7 +33,6 @@ export const addUser = createAsyncThunk(
     }
 )
 
-// Get user by id
 export const getUserById = createAsyncThunk(
     'users/getUserById',
     async (userId: string, { rejectWithValue }) => {
@@ -62,7 +45,6 @@ export const getUserById = createAsyncThunk(
     }
 );
 
-// Update user
 export const updateUser = createAsyncThunk(
     "users/updateUser",
     async ({ id, data }: { 
@@ -77,7 +59,6 @@ export const updateUser = createAsyncThunk(
     }
 });
 
-// Delete user
 export const deleteUser = createAsyncThunk(
     "users/deleteUser",
      async ({ id }: {id: string}, 
@@ -93,6 +74,43 @@ export const deleteUser = createAsyncThunk(
         return rejectWithValue(error.response?.data?.message || "Erreur serveur");
     }
 });
+
+export const assignClubToUser = createAsyncThunk(
+    "users/assignClubToUser",
+    async ({ userId, clubId }: { userId: string, clubId: string }, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.put(`/auth/assignClub/${userId}`, { clubId });
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Erreur serveur");
+        }
+    }
+);  
+
+export const removeClubFromUser = createAsyncThunk(
+    "users/removeClubFromUser",
+    async ({ userId }: { userId: string }, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.put(`/auth/deleteClub/${userId}`); 
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Erreur serveur");
+        }
+    }
+);
+
+export const getAllClubMembers = createAsyncThunk(
+    "users/getAllClubMembers",
+    async ({ clubId }: { clubId: string }, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.get(`/auth/getAllClubMembers/${clubId}`);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Erreur serveur");
+        }
+    }
+);
+
 
 const userSlice = createSlice({
     name: 'user',
@@ -160,8 +178,40 @@ const userSlice = createSlice({
             .addCase(deleteUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
-            });
+                })
+            // Assign club to user
+            .addCase(assignClubToUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(assignClubToUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.currentUser = action.payload;
+            })
+            .addCase(assignClubToUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string; 
+            })
+            // Remove club from user
+            .addCase(removeClubFromUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })  
+            .addCase(removeClubFromUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.currentUser = action.payload;
+            })
+            .addCase(removeClubFromUser.rejected, (state, action) => {
+                state.loading = false;  
+                state.error = action.payload as string;
+                })
+            // Get all club members
+            .addCase(getAllClubMembers.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
     }
 });
+
 
 export default userSlice.reducer;

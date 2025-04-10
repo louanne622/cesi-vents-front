@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaUser, FaLock } from 'react-icons/fa';
 import Button from '@/app/components/ui/Button';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { getUserById, updateUser } from '@/redux/features/userSlice';
+import { getUserById, updateUser, assignClubToUser, removeClubFromUser } from '@/redux/features/userSlice';
 import { toast } from 'react-hot-toast';
+import { getAllClubs } from '@/redux/features/clubSlice';
 
 export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
+  const { clubs } = useAppSelector((state) => state.club);
   const { id: userId } = use(params);
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -25,7 +27,10 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
     confirmPassword: '',
     bde_member: false,
     role: 'user',
+    clubId: '',
   });
+
+console.log(currentUser);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -40,17 +45,22 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
   }, [dispatch, userId]);
 
   useEffect(() => {
+    dispatch(getAllClubs());
+  }, [dispatch]); 
+
+  useEffect(() => {
     if (currentUser) {
       setFormData({
         first_name: currentUser.first_name,
         last_name: currentUser.last_name,
         email: currentUser.email,
         role: currentUser.role,
-        phone: currentUser.phone,
+        phone: currentUser.phone || '',
         campus: currentUser.campus,
-        bde_member: currentUser.bde_member,
+        bde_member: currentUser.bde_member || false,
         password: '',
         confirmPassword: '',
+        clubId: currentUser.clubId || '',
       });
     }
   }, [currentUser]);
@@ -86,8 +96,24 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
         campus: formData.campus,
         bde_member: formData.bde_member,
         role: formData.role as "user" | "admin" | "clubleader",
+        ...(formData.role === 'clubleader' ? { clubId: formData.clubId } : { clubId: '' }),
         ...(formData.password && { password: formData.password }),
       };
+
+      if (formData.role === 'clubleader' && formData.clubId) {
+        try {
+          await dispatch(assignClubToUser({ userId, clubId: formData.clubId })).unwrap(); 
+        } catch (error) {
+          toast.error('Erreur lors de l\'assignation du club');
+        }
+      } 
+      else if (formData.role !== 'clubleader' && currentUser.clubId) {
+        try {
+          await dispatch(removeClubFromUser({ userId })).unwrap();
+        } catch (error) {
+          toast.error('Erreur lors de la suppression de l\'association au club');
+        }
+      }
 
       await dispatch(updateUser({ id: userId, data: UserDataToSend })).unwrap();
       toast.success('Utilisateur mis à jour avec succès');
@@ -101,10 +127,20 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Si on change le rôle et que ce n'est plus clubleader, on vide le clubId
+    if (name === 'role' && value !== 'clubleader') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        clubId: '' // Vider le clubId
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   if (loading) {
@@ -306,6 +342,28 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
                 <option value="clubleader">Club Leader</option>
               </select>
             </div>
+            {/* Club (visible seulement si le rôle est clubleader) */}
+            {formData.role === 'clubleader' && (
+              <div>
+                <label htmlFor="clubId" className="block text-sm font-medium text-gray-700 mb-1">
+                  Club
+                </label>
+                <select
+                  id="clubId"
+                  name="clubId"
+                  value={formData.clubId}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
+                >
+                  <option value="">Sélectionner un club</option>
+                  {clubs.map((club) => (
+                    <option key={club._id} value={club._id}>
+                      {club.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* BDE Member */}
             <div className="flex items-center">
