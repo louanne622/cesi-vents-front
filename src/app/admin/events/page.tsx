@@ -1,53 +1,80 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { FaCalendarAlt, FaSearch, FaFilter, FaPlus, FaEye, FaTrash, FaPencilAlt } from 'react-icons/fa';
-import Button from '@/components/ui/Button';
-import Modal from '@/app/components/ui/Modal';
+import React, { useEffect, useState } from 'react';
+import { FaPlus, FaEye, FaTrash, FaPencilAlt } from 'react-icons/fa';
+import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
+import FilterBar from '@/components/ui/FilterBar';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { fetchEvents, cancelEvent } from '@/redux/features/eventSlice';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
-
-
 export default function AdminEventsPage() {
-  const router = useRouter();
   const dispatch = useAppDispatch();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
-  
+  const router = useRouter();
   const { events, status, error } = useAppSelector((state) => state.events);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+
   useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchEvents());
+    dispatch(fetchEvents());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
     }
-  }, [status, dispatch]);
+  }, [error]);
+
+  const handleViewEvent = (eventId: string) => {
+    router.push(`/admin/events/${eventId}`);
+  };
+
+  const handleEditEvent = (eventId: string) => {
+    router.push(`/admin/events/${eventId}/edit`);
+  };
+
+  const handleDeleteClick = (eventId: string) => {
+    setEventToDelete(eventId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!eventToDelete) return;
+
+    try {
+      await dispatch(cancelEvent(eventToDelete)).unwrap();
+      toast.success('Événement supprimé avec succès');
+      setIsDeleteModalOpen(false);
+      setEventToDelete(null);
+      // PAS de fetchEvents ici, Redux a déjà mis à jour les events
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de la suppression');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setEventToDelete(null);
+  };
+
+  const filteredEvents = events.filter(event =>
+    event.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
-        <div className="text-xl">Chargement...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#fbe216] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement des événements...</p>
+        </div>
       </div>
     );
   }
-
-  if (status === 'failed') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
-        <div className="text-xl text-red-600">Erreur: {error}</div>
-      </div>
-    );
-  }
-
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = selectedStatus === 'all' || event.status === selectedStatus;
-    return matchesSearch && matchesStatus;
-  });
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -63,59 +90,25 @@ export default function AdminEventsPage() {
           />
         </div>
 
-        {/* Barre de recherche et filtres */}
-        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaSearch className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Rechercher un événement..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
-              />
-            </div>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaFilter className="h-5 w-5 text-gray-400" />
-              </div>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="pl-10 pr-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fbe216] focus:border-transparent"
-              >
-                <option value="all">Tous les statuts</option>
-                <option value="published">Publiés</option>
-                <option value="draft">Brouillons</option>
-                <option value="cancelled">Annulés</option>
-              </select>
-            </div>
-          </div>
-        </div>
+        <FilterBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filters={[]}
+        />
 
-        {/* Liste des événements */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-4">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Événement
+                    Titre
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Lieu
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Participants
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Revenus
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Statut
@@ -126,65 +119,47 @@ export default function AdminEventsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredEvents.map((event) => (
+                {filteredEvents.map(event => (
                   <tr key={event._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <FaCalendarAlt className="h-10 w-10 text-[#fbe216]" />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{event.title}</div>
-                        </div>
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {event.title}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{new Date(event.date).toLocaleDateString()}</div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {event.date} à {event.time}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{event.location}</div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {event.location}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{event.participants?.length || 0}/{event.maxCapacity}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{event.price}€</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        event.status === 'published'
-                          ? 'bg-green-100 text-green-800'
-                          : event.status === 'draft'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {event.status === 'published' ? 'Publié' : event.status === 'draft' ? 'Brouillon' : 'Annulé'}
-                      </span>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+                      {event.status}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                       <Button
-                        text="Voir"
-                        color="secondary"
-                        variant="outline"
+                        text=""
                         icon={<FaEye />}
-                        onClick={() => router.push(`/admin/events/${event._id}`)}
+                        size="sm"
+                        variant="outline"
+                        color="primary"
+                        onClick={() => handleViewEvent(event._id)}
+                        className="w-8 h-8"
                       />
                       <Button
-                        text="Modifier"
-                        color="secondary"
-                        variant="outline"
+                        text=""
                         icon={<FaPencilAlt />}
-                        onClick={() => router.push(`/admin/events/${event._id}/edit`)}
+                        size="sm"
+                        variant="outline"
+                        color="secondary"
+                        onClick={() => handleEditEvent(event._id)}
+                        className="w-8 h-8"
                       />
                       <Button
-                        text="Supprimer"
-                        color="secondary"
-                        variant="outline"
+                        text=""
                         icon={<FaTrash />}
-                        onClick={() => {
-                          setEventToDelete(event._id);
-                          setIsDeleteModalOpen(true);
-                        }}
+                        size="sm"
+                        variant="outline"
+                        color="danger"
+                        onClick={() => handleDeleteClick(event._id)}
+                        className="w-8 h-8"
                       />
                     </td>
                   </tr>
@@ -194,54 +169,16 @@ export default function AdminEventsPage() {
           </div>
         </div>
 
-        {/* Modal de confirmation de suppression */}
+        {/* Modal suppression */}
         <Modal
           isOpen={isDeleteModalOpen}
-          onClose={() => {
-            setIsDeleteModalOpen(false);
-            setEventToDelete(null);
-          }}
-          title="Confirmer la suppression"
-        >
-          <div className="p-6">
-            <p className="text-gray-700 mb-6">
-              Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.
-            </p>
-            <div className="flex justify-end space-x-4">
-              <Button
-                text="Annuler"
-                color="secondary"
-                variant="outline"
-                onClick={() => {
-                  setIsDeleteModalOpen(false);
-                  setEventToDelete(null);
-                }}
-              />
-              <Button
-                text="Supprimer"
-                color="secondary"
-                onClick={async () => {
-                  if (eventToDelete) {
-                    try {
-                      const result = await dispatch(cancelEvent(eventToDelete));
-                      if (result.meta.requestStatus === 'fulfilled') {
-                        toast.success('Événement supprimé avec succès');
-                        dispatch(fetchEvents());
-                      } else {
-                        toast.error("Erreur lors de la suppression de l'événement");
-                      }
-                    } catch (error) {
-                      toast.error("Erreur lors de la suppression de l'événement");
-                    }
-                    setIsDeleteModalOpen(false);
-                    setEventToDelete(null);
-                  }
-                }}
-              />
-            </div>
-          </div>
-        </Modal>
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Supprimer l'événement"
+          message="Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible."
+          confirmText="Supprimer"
+        />
       </div>
     </div>
   );
-} 
+}

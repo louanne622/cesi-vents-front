@@ -50,7 +50,7 @@ const initialState: EventState = {
   error: null
 };
 
-// Créer un nouvel événement
+// Créer un événement
 export const createEvent = createAsyncThunk(
   'events/createEvent',
   async (eventData: CreateEventData, { rejectWithValue }) => {
@@ -85,7 +85,6 @@ export const fetchEventById = createAsyncThunk(
       const response = await axiosInstance.get(`/events/${eventId}/`);
       return response.data;
     } catch (error: any) {
-      // Axios structure l'erreur dans error.response
       const message = error.response?.data?.message || error.message || "Erreur inconnue";
       return rejectWithValue(message);
     }
@@ -106,13 +105,13 @@ export const updateEvent = createAsyncThunk(
   }
 );
 
-// Annuler un événement
+// Supprimer un événement
 export const cancelEvent = createAsyncThunk(
   'events/cancelEvent',
   async (eventId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.delete(`/events/${eventId}/`);
-      return response.data;
+      await axiosInstance.delete(`/events/${eventId}/`);
+      return eventId; // retourne juste l'ID supprimé
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Erreur inconnue";
       return rejectWithValue(message);
@@ -133,7 +132,6 @@ const eventSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Gestion de fetchEvents
       .addCase(fetchEvents.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -146,7 +144,7 @@ const eventSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload as string;
       })
-      // Gestion de fetchEventById
+
       .addCase(fetchEventById.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -159,7 +157,7 @@ const eventSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload as string;
       })
-      // Gestion de createEvent
+
       .addCase(createEvent.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -172,7 +170,7 @@ const eventSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload as string;
       })
-      // Gestion de updateEvent
+
       .addCase(updateEvent.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -188,17 +186,11 @@ const eventSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload as string;
       })
-      // Gestion de cancelEvent
-      .addCase(cancelEvent.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-      })
+
       .addCase(cancelEvent.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        const index = state.events.findIndex(event => event._id === action.payload.event._id);
-        if (index !== -1) {
-          state.events[index] = action.payload.event;
-        }
+        const deletedId = action.payload;
+        state.events = state.events.filter(event => event._id !== deletedId);
       })
       .addCase(cancelEvent.rejected, (state, action) => {
         state.status = 'failed';
