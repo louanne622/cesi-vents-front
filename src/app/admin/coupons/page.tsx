@@ -1,16 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { getAllPromotions, createPromotion, deactivatePromotion, activatePromotion, deletePromotion } from '@/redux/features/promotionSlice';
 import { getAllClubs } from '@/redux/features/clubSlice';
-import { getAllClubs } from '@/redux/features/clubSlice';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import toast from 'react-hot-toast';
-import { FaEye, FaTrash, FaChevronDown, FaCheck } from 'react-icons/fa';
 import { FaEye, FaTrash, FaChevronDown, FaCheck } from 'react-icons/fa';
 import Modal from '@/app/components/ui/Modal';
 import Button from '@/app/components/ui/Button';
