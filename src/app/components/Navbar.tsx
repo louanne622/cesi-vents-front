@@ -72,7 +72,7 @@ const Navbar = () => {
     {
       href: "/admin/dashboard",
       label: "Dashboard",
-      icon: MdEventNote,
+      icon: FaChartLine,
     }
   ];
 
