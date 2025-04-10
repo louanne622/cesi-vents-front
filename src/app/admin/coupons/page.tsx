@@ -243,7 +243,6 @@ export default function CouponsPage() {
                                     value={newPromotion.promotion_code}
                                     onChange={(e) => setNewPromotion({...newPromotion, promotion_code: e.target.value.toUpperCase()})}
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4 h-12 ${validationErrors.promotion_code ? 'border-red-500' : ''}`}
-                                    required
                                 />
                                 {validationErrors.promotion_code && (
                                     <p className="mt-1 text-sm text-red-600">Veuillez entrer un code de promotion</p>
