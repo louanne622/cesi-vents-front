@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axiosConfig';
 import toast from 'react-hot-toast';
+import { getAccessToken } from '@/utils/cookieService';
 
 interface Ticket {
     event_id: string;
@@ -64,10 +65,27 @@ export const getTicketsByClub = createAsyncThunk('ticket/getTicketsByClub', asyn
     }
 }); 
 
-// Cancel a ticket
-export const cancelTicket = createAsyncThunk('ticket/cancelTicket', async (ticketId: string, { rejectWithValue }) => {
+//tickets d'un utilisateur 
+export const fetchUserTickets = createAsyncThunk(
+    'ticket/fetchUserTickets',
+    async (userId: string, { rejectWithValue }) => {
+      try {
+        const response = await axiosInstance.get(`/tickets/user/${userId}`);
+        return response.data;
+      } catch (error: any) {
+        const message = error.response?.data?.message || error.message || "Erreur inconnue";
+        return rejectWithValue(message);
+      }
+    }
+  );
+
+// delete a ticket      
+export const deleteTicket = createAsyncThunk('ticket/deleteTicket', async (ticketId: string, { rejectWithValue }) => {
+    const token = getAccessToken();
     try {
-        const response = await axiosInstance.put(`/tickets/${ticketId}/cancel`);
+        const response = await axiosInstance.delete(`/tickets/${ticketId}`, {
+            headers: { 'x-auth-token': token }
+        });
         return response.data;
     } catch (error) {
         return rejectWithValue(error);
@@ -90,10 +108,10 @@ const ticketSlice = createSlice({
             state.loading = false;
             state.error = action.payload as string;
         });
-        builder.addCase(getTicketsByUser.pending, (state) => {
+        builder.addCase(fetchUserTickets.pending, (state) => {
             state.loading = true;
         });
-        builder.addCase(getTicketsByUser.fulfilled, (state, action) => {
+        builder.addCase(fetchUserTickets.fulfilled, (state, action) => {
             state.loading = false;
             state.tickets = action.payload;
         });
@@ -122,18 +140,19 @@ const ticketSlice = createSlice({
         builder.addCase(getTicketsByClub.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload as string;
-        });
-        builder.addCase(cancelTicket.pending, (state) => {
+        })
+        builder.addCase(deleteTicket.pending, (state) => {
             state.loading = true;
-        });
-        builder.addCase(cancelTicket.fulfilled, (state, action) => {
+            state.error = null;
+        })
+        builder.addCase(deleteTicket.fulfilled, (state, action) => {
             state.loading = false;
-            state.tickets = state.tickets.filter((ticket) => ticket.event_id !== action.payload.event_id);
-        });
-        builder.addCase(cancelTicket.rejected, (state, action) => {
+            state.tickets = state.tickets.filter(ticket => ticket.event_id !== action.payload.event_id);
+        })
+        builder.addCase(deleteTicket.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload as string;
-        }); 
+        });
     },
 });
 

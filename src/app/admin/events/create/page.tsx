@@ -18,6 +18,7 @@ interface EventFormData {
   price: string;
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
+  availableTickets: number;
 }
 
 export default function CreateEventPage() {
@@ -34,7 +35,8 @@ export default function CreateEventPage() {
     maxCapacity: '',
     price: '',
     registrationDeadline: '',
-    status: 'draft'
+    status: 'draft',
+    availableTickets: 0
   });
 
   const handleChange = (
@@ -53,7 +55,8 @@ export default function CreateEventPage() {
         createEvent({
           ...formData,
           maxCapacity: parseInt(formData.maxCapacity),
-          price: parseFloat(formData.price)
+          price: parseFloat(formData.price),
+          availableTickets: formData.availableTickets
         })
       );
 

@@ -17,6 +17,7 @@ type CreateEventData = {
   price: number;
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
+  availableTickets: number;
 };
 
 interface Event {
@@ -30,10 +31,10 @@ interface Event {
   price: number;
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
-  createdBy: string;
   participants: Participant[];
   createdAt: string;
   updatedAt: string;
+  availableTickets: number;
 }
 
 interface EventState {
@@ -92,6 +93,34 @@ export const fetchEventById = createAsyncThunk(
   }
 );
 
+//increase capacity
+export const increaseCapacity = createAsyncThunk(
+  'events/increaseCapacity',
+  async (eventId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/events/${eventId}/tickets/increase`);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Erreur inconnue";
+      return rejectWithValue(message);
+    }
+  }
+);
+
+//decrease capacity
+export const decreaseCapacity = createAsyncThunk(
+  'events/decreaseCapacity',
+  async (eventId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/events/${eventId}/tickets/decrease`);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Erreur inconnue";
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const eventSlice = createSlice({
   name: 'events',
   initialState,
@@ -128,6 +157,32 @@ const eventSlice = createSlice({
         state.selectedEvent = action.payload;
       })
       .addCase(fetchEventById.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      // Gestion de increaseCapacity
+      .addCase(increaseCapacity.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(increaseCapacity.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.selectedEvent = action.payload;
+      })
+      .addCase(increaseCapacity.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      // Gestion de decreaseCapacity
+      .addCase(decreaseCapacity.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(decreaseCapacity.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.selectedEvent = action.payload;
+      })
+      .addCase(decreaseCapacity.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
       });
