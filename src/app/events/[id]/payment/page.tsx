@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Button from '@/app/components/ui/Button';
-import { FaArrowLeft, FaLock, FaCheck, FaTag } from 'react-icons/fa';
+import { FaArrowLeft, FaLock, FaCheck } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { createTicket } from '@/redux/features/ticketSlice';
-import { fetchEventById } from '@/redux/features/eventSlice';
+import { createTransaction } from '@/redux/features/transactionSlice';
+import { fetchEventById, increaseCapacity } from '@/redux/features/eventSlice';
 import { getPromotionByCode } from '@/redux/features/promotionSlice';
 import { RootState } from '@/redux/store';
 import toast from 'react-hot-toast';
@@ -19,7 +20,6 @@ interface PaymentInfo {
 }
 
 interface Event {
-  _id: string;
   title: string;
   description: string;
   date: string;
@@ -119,7 +119,7 @@ export default function EventPaymentPage() {
   };
 
   const calculateTotal = () => {
-    if (!event) return 0;
+    if (!event?.price) return 0;
     
     let total = event.price;
     if (appliedPromotion) {
@@ -140,25 +140,42 @@ export default function EventPaymentPage() {
     setIsLoading(true);
 
     try {
-      // Simuler un délai de traitement
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Créer la transaction
+      const transactionData = {
+        userId: profile._id,
+        totalAmount: calculateTotal(),
+        promoCode: appliedPromotion ? appliedPromotion.promotion_code : '',
+        date: new Date()
+      };
+
+      const transactionResult = await dispatch(createTransaction(transactionData) as any);
+      if (transactionResult.error) {
+        throw new Error(transactionResult.error.message);
+      }
 
       // Créer le ticket
       const ticketData = {
+        _id: `${event?._id}-${profile._id}-${Date.now()}`,
         event_id: event?._id || '',
-        user_id: profile?._id || '',
+        user_id: profile._id || '',
+        transaction_id: transactionResult.payload._id,
         purchase_date: new Date(),
         status: "valid",
-        qr_code: `${event?._id}-${profile?._id}-${Date.now()}`
+        qr_code: `${event?._id}-${profile._id}-${Date.now()}`
       };
 
       await dispatch(createTicket(ticketData) as any);
-      
+
+
+      // Rediriger vers la page de confirmation
       setPaymentComplete(true);
-      toast.success('Paiement et inscription réussis !');
-    } catch (error) {
-      toast.error('Une erreur est survenue lors de la création du ticket');
-      console.error('Erreur lors de la création du ticket:', error);
+      toast.success('Paiement effectué avec succès !');
+      setTimeout(() => {
+        router.push(`/events/${params.id}/confirmation`);
+      }, 2000);
+    } catch (error: any) {
+      console.error('Erreur lors du paiement:', error);
+      toast.error(error.message || 'Une erreur est survenue lors du paiement');
     } finally {
       setIsLoading(false);
     }
@@ -270,7 +287,7 @@ export default function EventPaymentPage() {
                 </p>
               )}
               <p className="text-xl font-bold">
-                <span className="font-medium">Total :</span> {calculateTotal().toFixed(2)}€
+                <span className="font-medium">Total :</span> {event.price ? calculateTotal().toFixed(2) : '0.00'}€
               </p>
               <p><span className="font-medium">Date :</span> {event?.date} à {event?.time}</p>
               <p><span className="font-medium">Lieu :</span> {event?.location}</p>

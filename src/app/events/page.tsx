@@ -18,6 +18,7 @@ interface Event {
   time: string;
   location: string;
   maxCapacity: number;
+  availableTickets: number;
   price: number;
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
@@ -57,9 +58,8 @@ export default function EventsPage() {
       );
     }
 
-    setFilteredEvents(result);
+    setFilteredEvents(result as Event[]);
   }, [events, searchTerm]);
-
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -123,7 +123,7 @@ export default function EventsPage() {
                 }}
                 price={event.price}
                 maxCapacity={event.maxCapacity}
-                currentParticipants={event.participants.filter(p => p.status === 'confirmed').length}
+                currentParticipants={event.availableTickets}
                 status={event.status}
                 deadline={new Date(event.registrationDeadline).toLocaleDateString('fr-FR')}
               />

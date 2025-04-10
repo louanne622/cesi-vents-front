@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getTicketsByUser } from '@/redux/features/ticketSlice';
-import { RootState, AppDispatch } from '@/redux/store';
-import { FaQrcode, FaCalendarAlt, FaUser, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { getTicketsByUser, deleteTicket } from '@/redux/features/ticketSlice';
+import { RootState } from '@/redux/store';
+import { FaCalendarAlt, FaUser, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import QRCodeSVG from 'react-qr-code';
 import Button from '@/app/components/ui/Button';
 import Link from 'next/link';
 
 const TicketsPage = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { tickets, loading, error } = useSelector((state: RootState) => state.ticket);
-  const { profile } = useSelector((state: RootState) => state.auth);
+  const dispatch = useAppDispatch();
+  const { tickets, loading, error } = useAppSelector((state: RootState) => state.ticket);
+  const { profile } = useAppSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     if (profile) {
@@ -40,67 +41,95 @@ const TicketsPage = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="w-full max-w-2xl mx-auto">
           {/* En-tête */}
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Mes tickets</h1>
-            <Link href="/profile">
+          <div className="flex flex-col md:flex-row items-center justify-between mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-0">Mes tickets</h1>
+            <Link href="/profile" className="w-full md:w-auto">
               <Button
                 text="Retour au profil"
                 color="primary"
                 variant="outline"
+                className="w-full md:w-auto justify-center"
                 onClick={() => {}}
               />
             </Link>
           </div>
 
           {tickets.length === 0 ? (
-            <div className="text-center text-gray-500">
-              Vous n'avez pas encore de tickets.
+            <div className="text-center text-gray-500 py-12">
+              <p className="text-base md:text-lg">Vous n'avez pas encore de tickets.</p>
+              <p className="mt-2 text-sm md:text-base text-gray-400">
+                Participez à des événements pour obtenir vos tickets !
+              </p>
             </div>
           ) : (
             <div className="space-y-6">
               {tickets.map((ticket) => (
                 <div
                   key={ticket.event_id}
-                  className="bg-white rounded-lg shadow-sm p-6 relative"
+                  className="bg-white rounded-lg shadow-sm p-4 md:p-6 relative"
                 >
-                  {/* QR Code Section */}
-                  <div className="absolute top-4 left-4 bg-white p-2 rounded border border-gray-200 flex items-center justify-center w-32 h-32">
-                    <FaQrcode size={40} className="text-gray-500" />
-                  </div>
-
-                  {/* Ticket Content */}
-                  <div className="ml-32">
-                    <div className="flex items-center mb-4">
-                      <FaCalendarAlt size={20} className="text-gray-500" />
-                      <span className="ml-2 text-lg font-medium">
-                        {new Date(ticket.purchase_date).toLocaleDateString()}
-                      </span>
+                  {/* QR Code and Content */}
+                  <div className="flex flex-col md:flex-row items-start gap-4 md:gap-6">
+                    {/* QR Code Section */}
+                    <div className="bg-white p-4 rounded border border-gray-200 w-full md:w-40">
+                      <QRCodeSVG
+                        value={`CESI Vents Ticket\nEvent: ${ticket.event_id}\nUser: ${profile?.first_name} ${profile?.last_name}\nDate: ${new Date(ticket.purchase_date).toISOString()}`}
+                        size={128}
+                        bgColor="#ffffff"
+                        fgColor="#000000"
+                        level="H"
+                      />
                     </div>
 
-                    <div className="flex items-center mb-4">
-                      <FaUser size={20} className="text-gray-500" />
-                      <span className="ml-2">
-                        {profile?.first_name} {profile?.last_name}
-                      </span>
-                    </div>
+                    {/* Ticket Content */}
+                    <div className="flex-1">
+                      <div className="flex flex-col gap-3 md:gap-4">
+                        <div className="flex items-center">
+                          <FaCalendarAlt size={20} className="text-gray-500" />
+                          <span className="ml-2 text-base md:text-lg font-medium">
+                            {new Date(ticket.purchase_date).toLocaleDateString()}
+                          </span>
+                        </div>
 
-                    <div className="flex items-center mb-4">
-                      <span className="font-medium">Événement: {ticket.event_id}</span>
-                    </div>
+                        <div className="flex items-center">
+                          <FaUser size={20} className="text-gray-500" />
+                          <span className="ml-2 text-sm md:text-base">
+                            {profile?.first_name} {profile?.last_name}
+                          </span>
+                        </div>
 
-                    <div className="mt-auto flex items-center justify-end">
-                      <div className="flex items-center gap-2 px-3 py-2 rounded-md font-medium text-sm">
-                        {ticket.status === 'used' ? (
-                          <>
-                            <FaTimesCircle className="text-red-500" />
-                            <span className="text-red-500">Utilisé</span>
-                          </>
-                        ) : (
-                          <>
-                            <FaCheckCircle className="text-green-500" />
-                            <span className="text-green-500">Valide</span>
-                          </>
-                        )}
+                        <div className="flex items-center">
+                          <span className="font-medium text-sm md:text-base">Événement: {ticket.event_id}</span>
+                        </div>
+
+                        <div className="mt-auto flex items-center justify-between">
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-md font-medium text-sm md:text-base">
+                            {ticket.status === 'used' ? (
+                              <>
+                                <FaTimesCircle className="text-red-500" />
+                                <span className="text-red-500">Utilisé</span>
+                              </>
+                            ) : (
+                              <>
+                                <FaCheckCircle className="text-green-500" />
+                                <span className="text-green-500">Valide</span>
+                              </>
+                            )}
+                          </div>
+                          {ticket.status === 'valid' && (
+                            <Button
+                              text="Annuler"
+                              color="danger"
+                              variant="solid"
+                              className="w-full md:w-auto"
+                              onClick={() => {
+                                dispatch(deleteTicket(ticket.event_id))
+                                dispatch(getTicketsByUser(profile._id))
+                              }}
+                              disabled={loading}
+                            />
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
