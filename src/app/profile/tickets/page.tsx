@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { getTicketsByUser, deleteTicket } from '@/redux/features/ticketSlice';
+import { fetchUserTickets, deleteTicket } from '@/redux/features/ticketSlice';
 import { RootState } from '@/redux/store';
 import { FaCalendarAlt, FaUser, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import QRCodeSVG from 'react-qr-code';
@@ -13,12 +13,22 @@ const TicketsPage = () => {
   const dispatch = useAppDispatch();
   const { tickets, loading, error } = useAppSelector((state: RootState) => state.ticket);
   const { profile } = useAppSelector((state: RootState) => state.auth);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (profile) {
-      dispatch(getTicketsByUser(profile._id));
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  useEffect(() => {
+    if (profile && isMounted) {
+      dispatch(fetchUserTickets(profile._id));
     }
-  }, [dispatch, profile]);
+  }, [dispatch, profile, isMounted]);
+
+  if (!isMounted) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -54,7 +64,7 @@ const TicketsPage = () => {
             </Link>
           </div>
 
-          {tickets.length === 0 ? (
+          {tickets?.length === 0 ? (
             <div className="text-center text-gray-500 py-12">
               <p className="text-base md:text-lg">Vous n'avez pas encore de tickets.</p>
               <p className="mt-2 text-sm md:text-base text-gray-400">
@@ -63,7 +73,7 @@ const TicketsPage = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {tickets.map((ticket) => (
+              {tickets?.map((ticket) => (
                 <div
                   key={ticket.event_id}
                   className="bg-white rounded-lg shadow-sm p-4 md:p-6 relative"
@@ -116,19 +126,6 @@ const TicketsPage = () => {
                               </>
                             )}
                           </div>
-                          {ticket.status === 'valid' && (
-                            <Button
-                              text="Annuler"
-                              color="danger"
-                              variant="solid"
-                              className="w-full md:w-auto"
-                              onClick={() => {
-                                dispatch(deleteTicket(ticket.event_id))
-                                dispatch(getTicketsByUser(profile._id))
-                              }}
-                              disabled={loading}
-                            />
-                          )}
                         </div>
                       </div>
                     </div>
