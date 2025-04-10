@@ -20,7 +20,14 @@ const initialState: TransactionState = {
     error: null,
 };
 
-
+//get all transaction
+export const getAllTransactions = createAsyncThunk(
+    'transaction/getAllTransactions',
+    async () => {
+        const response = await axiosInstance.get('/transaction/');
+        return response.data;
+    }
+);
 //create transaction
 export const createTransaction = createAsyncThunk(
     'transaction/createTransaction',
@@ -82,6 +89,17 @@ export const transactionSlice = createSlice({
             state.transactions = action.payload;
         })
         .addCase(getTransactionsByYear.rejected, (state) => {
+            state.loading = false;
+            state.error = 'Failed to fetch transactions';
+        })
+        builder.addCase(getAllTransactions.pending, (state) => {
+            state.loading = true;
+        })
+        .addCase(getAllTransactions.fulfilled, (state, action) => {
+            state.loading = false;
+            state.transactions = action.payload;
+        })
+        .addCase(getAllTransactions.rejected, (state) => {
             state.loading = false;
             state.error = 'Failed to fetch transactions';
         });
