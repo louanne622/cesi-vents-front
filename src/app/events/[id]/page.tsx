@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
@@ -14,6 +14,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { fetchEventById } from '@/redux/features/eventSlice';
+import { fetchUserTickets } from '@/redux/features/ticketSlice';
 import React from 'react';
 
 interface Participant {
@@ -31,12 +32,22 @@ interface Event {
   location: string;
   maxCapacity: number;
   price: number;
+  availableTickets: number;
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
   createdBy: string;
   participants: Participant[];
   createdAt: string;
   updatedAt: string;
+}
+
+interface Ticket {
+  _id: string;
+  event_id: string;
+  user_id: string;
+  purchase_date: string;
+  status: 'valid' | 'used' | 'cancelled';
+  qr_code: string;
 }
 
 interface PageParams {
@@ -48,10 +59,29 @@ export default function EventDetailsPage({ params }: { params: Promise<PageParam
   const dispatch = useDispatch<AppDispatch>();
   const { selectedEvent: event, status, error } = useSelector((state: RootState) => state.events);
   const resolvedParams = React.use(params);
+  const profile = useSelector((state: RootState) => state.auth.profile);
+  const { tickets, loading: ticketLoading, error: ticketError } = useSelector((state: RootState) => state.ticket);
+
+  const [hasTicket, setHasTicket] = useState(false);
+  const [ticketCheckError, setTicketCheckError] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchEventById(resolvedParams.id));
   }, [dispatch, resolvedParams.id]);
+
+  useEffect(() => {
+    if (profile?._id && event?._id) {
+      dispatch(fetchUserTickets(profile._id));
+    }
+  }, [dispatch, profile?._id, event?._id]);
+
+  useEffect(() => {
+    if (tickets && event?._id) {
+      const hasExistingTicket = tickets.some(ticket => ticket.event_id === event._id);
+      setHasTicket(hasExistingTicket);
+      setTicketCheckError(null);
+    }
+  }, [tickets, event?._id]);
 
   if (status === 'loading') {
     return (
@@ -71,8 +101,6 @@ export default function EventDetailsPage({ params }: { params: Promise<PageParam
       </div>
     );
   }
-
-  const confirmedParticipants = event.participants.filter(p => p.status === 'confirmed').length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -132,7 +160,7 @@ export default function EventDetailsPage({ params }: { params: Promise<PageParam
           <div className="space-y-4">
             <div className="flex items-center text-gray-600">
               <FaUsers className="w-5 h-5 mr-3 text-yellow-400" />
-              <span>{confirmedParticipants}/{event.maxCapacity} participants</span>
+              <span>{event.availableTickets}/{event.maxCapacity} participants</span>
             </div>
             <div className="flex items-center text-gray-600">
               <FaMoneyBillWave className="w-5 h-5 mr-3 text-yellow-400" />
@@ -151,7 +179,7 @@ export default function EventDetailsPage({ params }: { params: Promise<PageParam
         <div className="bg-white rounded-lg p-6 mb-8">
           <div className="flex items-center text-gray-600">
             <FaUser className="w-5 h-5 mr-3 text-yellow-400" />
-            <span>Organisé par {event.createdBy}</span>
+            <span>Organisé par {/*{event.createdBy}*/} </span>
           </div>
         </div>
 
@@ -159,13 +187,24 @@ export default function EventDetailsPage({ params }: { params: Promise<PageParam
         <div className="flex justify-center">
           <button
             className="bg-yellow-400 text-gray-900 px-8 py-3 rounded-lg hover:bg-yellow-500 transition-colors text-lg font-medium"
-            disabled={event.status !== 'published' || confirmedParticipants >= event.maxCapacity}
-            onClick={() => console.log("TODO: implémenter l'inscription")}
+            disabled={
+              event?.status !== 'published' || 
+              event?.availableTickets >= event?.maxCapacity ||
+              hasTicket ||
+              ticketLoading
+            }
+            onClick={() => router.push(`/events/${event?._id}/payment`)}
           >
-            {event.status !== 'published'
+            {event?.status !== 'published'
               ? 'Inscriptions non ouvertes'
-              : confirmedParticipants >= event.maxCapacity
+              : event?.availableTickets >= event?.maxCapacity
               ? 'Événement complet'
+              : hasTicket
+              ? 'Vous avez déjà un ticket'
+              : ticketError
+              ? ticketError
+              : ticketLoading
+              ? 'Vérification en cours...'
               : "S'inscrire"}
           </button>
         </div>

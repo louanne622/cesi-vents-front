@@ -10,7 +10,6 @@ import FilterBar from '@/app/components/ui/FilterBar';
 import SearchBar from '../components/events/SearchBar';
 
 interface Event {
-  category?: string;
   _id: string;
   title: string;
   description: string;
@@ -21,14 +20,15 @@ interface Event {
   price: number;
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
-  createdBy: string;
   participants: Array<{
     userId: string;
     status: 'pending' | 'confirmed' | 'cancelled';
     registrationDate: string;
   }>;
   createdAt: string;
+  clubId: string;
   updatedAt: string;
+  availableTickets: number;
 }
 
 export default function EventsPage() {
@@ -57,9 +57,8 @@ export default function EventsPage() {
       );
     }
 
-    setFilteredEvents(result);
+    setFilteredEvents(result as Event[]);
   }, [events, searchTerm]);
-
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -123,7 +122,7 @@ export default function EventsPage() {
                 }}
                 price={event.price}
                 maxCapacity={event.maxCapacity}
-                currentParticipants={event.participants.filter(p => p.status === 'confirmed').length}
+                currentParticipants={event.availableTickets}
                 status={event.status}
                 deadline={new Date(event.registrationDeadline).toLocaleDateString('fr-FR')}
               />
