@@ -57,7 +57,7 @@ export default function EventsPage() {
       );
     }
 
-    setFilteredEvents(result);
+    setFilteredEvents(result as Event[]);
   }, [events, searchTerm]);
 
   return (

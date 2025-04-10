@@ -19,6 +19,7 @@ type CreateEventData = {
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
   availableTickets: number;
+  availableTickets: number;
 };
 
 interface Event {
@@ -36,6 +37,7 @@ interface Event {
   createdAt: string;
   clubId: string;
   updatedAt: string;
+  availableTickets: number;
   availableTickets: number;
 }
 
@@ -264,6 +266,32 @@ const eventSlice = createSlice({
         state.events = state.events.filter(event => event._id !== deletedId);
       })
       .addCase(cancelEvent.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      // Gestion de increaseCapacity
+      .addCase(increaseCapacity.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(increaseCapacity.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.selectedEvent = action.payload;
+      })
+      .addCase(increaseCapacity.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      // Gestion de decreaseCapacity
+      .addCase(decreaseCapacity.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(decreaseCapacity.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.selectedEvent = action.payload;
+      })
+      .addCase(decreaseCapacity.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
       });
