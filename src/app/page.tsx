@@ -1,9 +1,14 @@
-import Image from "next/image";
+import Hero from "./components/Hero";
+import EventCard from "./components/Eventcard";
+
 
 export default function Home() {
   return (
-    <div>
-      <h1>Hello World</h1>
-    </div>
+    <>
+      <Hero />
+      <div className="p-6">
+
+      </div>
+    </>
   );
 }
