@@ -266,32 +266,6 @@ const eventSlice = createSlice({
       .addCase(cancelEvent.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
-      })
-      // Gestion de increaseCapacity
-      .addCase(increaseCapacity.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-      })
-      .addCase(increaseCapacity.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.selectedEvent = action.payload;
-      })
-      .addCase(increaseCapacity.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload as string;
-      })
-      // Gestion de decreaseCapacity
-      .addCase(decreaseCapacity.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-      })
-      .addCase(decreaseCapacity.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.selectedEvent = action.payload;
-      })
-      .addCase(decreaseCapacity.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload as string;
       });
   },
 });
