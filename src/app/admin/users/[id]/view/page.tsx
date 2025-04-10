@@ -89,7 +89,7 @@ export default function ViewUserPage({ params }: { params: Promise<PageParams> }
             <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-100 flex items-center justify-center mb-4 md:mb-0 md:mr-8">
               {currentUser.avatar ? (
                 <img
-                  src={currentUser.avatar}
+                  src={currentUser.avatar.url}
                   alt={`${currentUser.first_name} ${currentUser.last_name}`}
                   className="w-full h-full rounded-full object-cover"
                 />
