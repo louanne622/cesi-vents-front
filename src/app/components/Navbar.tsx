@@ -69,6 +69,11 @@ const Navbar = () => {
       label: "Profil",
       icon: FaUser,
     },
+    {
+      href: "/admin/dashboard",
+      label: "Dashboard",
+      icon: FaUsers,
+    }
   ];
 
   const adminNavItems = [
@@ -125,7 +130,7 @@ const Navbar = () => {
       {/* Version mobile nav */}
       <nav className="fixed md:hidden bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
         <div className="flex justify-around items-center h-16">
-          {(pathname.startsWith('/admin') ? adminNavItems : (pathname.startsWith('/admin') ? adminNavItems : navItems)).map((item) => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link 
