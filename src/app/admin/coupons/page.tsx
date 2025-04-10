@@ -277,7 +277,7 @@ export default function CouponsPage() {
                                         </button>
                                         <Button
                                             text=""
-                                            color="danger"
+                                            color="secondary"
                                             variant="outline"
                                             size="sm"
                                             icon={<FaTrash />}

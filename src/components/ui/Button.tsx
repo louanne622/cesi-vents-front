@@ -3,7 +3,7 @@ import { IconType } from 'react-icons';
 
 interface ButtonProps {
   text: string;
-  color?: 'primary' | 'secondary';
+  color?: 'primary' | 'secondary' | 'danger';
   variant?: 'solid' | 'outline';
   icon?: React.ReactElement<IconType>;
   iconPosition?: 'left' | 'right';
@@ -30,6 +30,10 @@ export default function Button({
     secondary: {
       solid: 'bg-gray-600 text-white hover:bg-gray-700',
       outline: 'border-2 border-gray-600 text-gray-600 hover:bg-gray-600/10',
+    },
+    danger: {
+      solid: 'bg-red-500 text-white hover:bg-red-600',
+      outline: 'border-2 border-red-500 text-red-500 hover:bg-red-500/10',
     },
   };
 

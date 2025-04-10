@@ -1,12 +1,11 @@
 "use client";
 
 import React from "react";
-import { IconType } from 'react-icons';
 
 
 interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {
   text: string;
-  color?: 'primary' | 'secondary';
+  color?: 'primary' | 'secondary' | 'danger';
   variant?: 'solid' | 'outline';
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';

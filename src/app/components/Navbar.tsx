@@ -112,6 +112,14 @@ const Navbar = () => {
     });
   }
 
+  if (currentUser?.role === "clubleader") {
+    navItems.push({
+      href: "/clubleader",
+      label: "Gestion de club",
+      icon: FaUsers,
+    });
+  }
+
   return (
     <>
       {/* Version mobile nav */}

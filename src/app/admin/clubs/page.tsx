@@ -163,7 +163,7 @@ export default function AdminClubsPage() {
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
-                  </th>
+                  </th> 
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -219,7 +219,7 @@ export default function AdminClubsPage() {
                       />
                       <Button
                         text=""
-                        color="danger"
+                        color="primary"
                         variant="outline"
                         size="sm"
                         icon={<FaTrash />}

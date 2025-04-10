@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaCalendarAlt, FaMapMarkerAlt, FaClock, FaUsers, FaMoneyBill } from 'react-icons/fa';
 import Button from '@/app/components/ui/Button';
-import { createEvent } from '@/redux/features/eventSlice';
-import { useAppDispatch } from '@/redux/hooks';
+import { createEvent} from '@/redux/features/eventSlice';
+import { getAllClubs } from '@/redux/features/clubSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { toast } from 'react-hot-toast';
 
 interface EventFormData {
@@ -14,13 +15,16 @@ interface EventFormData {
   date: string;
   time: string;
   location: string;
+  clubId: string;
   maxCapacity: string;
   price: string;
   registrationDeadline: string;
   status: 'draft' | 'published' | 'cancelled';
 }
 
+
 export default function CreateEventPage() {
+  const { clubs } = useAppSelector((state) => state.club);
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -31,11 +35,16 @@ export default function CreateEventPage() {
     date: '',
     time: '',
     location: '',
+    clubId: '',
     maxCapacity: '',
     price: '',
     registrationDeadline: '',
     status: 'draft'
   });
+
+  useEffect(() => {
+    dispatch(getAllClubs());
+  }, [dispatch]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -58,6 +67,7 @@ export default function CreateEventPage() {
       );
 
       if (result.meta.requestStatus === 'fulfilled') {
+        console.log(formData);
         toast.success('Événement créé avec succès !');
         router.push('/admin/events');
       } else {
@@ -204,6 +214,26 @@ export default function CreateEventPage() {
                 <option value="draft">Brouillon</option>
                 <option value="published">Publié</option>
                 <option value="cancelled">Annulé</option>
+              </select>
+            </div>
+
+            {/* Club */}
+            <div>
+              <label htmlFor="clubId" className="block text-sm font-medium text-gray-700 mb-1">Club</label>
+              <select
+                id="clubId"
+                name="clubId"
+                value={formData.clubId}
+                onChange={handleChange}
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
+                required
+              >
+                <option value="">Sélectionner un club</option>
+                {clubs.map((club: { _id: string, name: string }) => (
+                  <option key={club._id} value={club._id}>
+                    {club.name}
+                  </option>
+                ))}
               </select>
             </div>
 
