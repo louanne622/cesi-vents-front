@@ -57,7 +57,7 @@ const Navbar = () => {
     {
       href: "/clubs",
       label: "Clubs",
-      icon: FaUsers,
+      icon: GiClubs,
     },
     {
       href: "/events", 
@@ -72,7 +72,7 @@ const Navbar = () => {
     {
       href: "/admin/dashboard",
       label: "Dashboard",
-      icon: FaUsers,
+      icon: MdEventNote,
     }
   ];
 
@@ -108,14 +108,6 @@ const Navbar = () => {
       icon: FaTicketAlt,
     },
   ];
-
-  if (currentUser?.role === "admin") {
-    navItems.push({
-      href: "/admin/dashboard",
-      label: "Dashboard",
-      icon: FaUsers,
-    });
-  }
 
   if (currentUser?.role === "clubleader") {
     navItems.push({
@@ -168,7 +160,7 @@ const Navbar = () => {
         {/* Menu principal */}
         <div className="flex-1 py-8 px-4"> {/* Augmenté le padding vertical */}
           <div className="space-y-2">
-            {(pathname.startsWith('/admin') ? adminNavItems : (pathname.startsWith('/admin') ? adminNavItems : navItems)).map((item) => {
+            {(pathname.startsWith('/admin') ? adminNavItems : navItems).map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
