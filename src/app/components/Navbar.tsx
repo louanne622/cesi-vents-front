@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaCog, FaSignOutAlt, FaMoneyBillWave, FaTicketAlt } from "react-icons/fa";
+import { FaHome, FaUsers, FaCalendarAlt, FaUser, FaCog, FaSignOutAlt, FaMoneyBillWave, FaTicketAlt, FaChartLine } from "react-icons/fa";
 import { MdEventNote } from 'react-icons/md';
 import { GiClubs } from 'react-icons/gi';
 import Image from "next/image";
@@ -72,7 +72,7 @@ const Navbar = () => {
     {
       href: "/admin/dashboard",
       label: "Dashboard",
-      icon: MdEventNote,
+      icon: FaChartLine,
     }
   ];
 
@@ -80,7 +80,7 @@ const Navbar = () => {
     {
       href: "/admin/dashboard",
       label: "Tableau de bord",
-      icon: FaHome,
+      icon: FaChartLine,
     },
     {
       href: "/admin/users",

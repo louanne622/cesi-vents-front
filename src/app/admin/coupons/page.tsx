@@ -17,12 +17,7 @@ interface Club {
     _id: string;
     name: string;
 }
-import axiosInstance from '@/utils/axiosConfig';
 
-interface Club {
-    _id: string;
-    name: string;
-}
 
 interface Promotion {
     _id: string;
@@ -56,15 +51,6 @@ export default function CouponsPage() {
     const [maxUsePreset, setMaxUsePreset] = useState<string>('custom');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [promotionToDelete, setPromotionToDelete] = useState<PromotionInfoForDeletion | null>(null);
-    const [validationErrors, setValidationErrors] = useState({
-        promotion_code: false,
-        validation_date: false,
-        max_use: false,
-        value: false
-    });
-    const [isClubDropdownOpen, setIsClubDropdownOpen] = useState(false);
-    const clubDropdownRef = useRef<HTMLDivElement>(null);
-    const [selectedClubNames, setSelectedClubNames] = useState<Record<string, string>>({});
     const [validationErrors, setValidationErrors] = useState({
         promotion_code: false,
         validation_date: false,
