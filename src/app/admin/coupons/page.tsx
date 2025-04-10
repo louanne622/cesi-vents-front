@@ -21,6 +21,7 @@ interface Club {
     name: string;
 }
 
+
 interface Promotion {
     _id: string;
     promotion_code: string;
