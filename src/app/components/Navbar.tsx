@@ -74,11 +74,6 @@ const Navbar = () => {
       label: "Dashboard",
       icon: MdEventNote,
     }
-    {
-      href: "/admin/dashboard",
-      label: "Dashboard",
-      icon: FaUsers,
-    }
   ];
 
   const adminNavItems = [
@@ -122,7 +117,7 @@ const Navbar = () => {
     });
   }
 
-=======
+  return (
     <>
       {/* Version mobile nav */}
       <nav className="fixed md:hidden bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
