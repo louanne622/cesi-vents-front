@@ -6,6 +6,7 @@ import userReducer from './features/userSlice';
 import promotionsReducer from './features/promotionSlice';
 import ticketReducer from './features/ticketSlice';
 import transactionReducer from './features/transactionSlice';
+import goodieReducer from './features/goodieSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     promotions: promotionsReducer,
     ticket: ticketReducer,
     transaction: transactionReducer,
+    goodie: goodieReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

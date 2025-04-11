@@ -1,18 +1,32 @@
 "use client";
 
-import React, { useEffect } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useState } from 'react';
 import Button from '../components/ui/Button';
-import { FaUser, FaEdit, FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaUser, FaEdit, FaCalendarAlt, FaMapMarkerAlt, FaGift } from 'react-icons/fa';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { getProfile } from '@/redux/features/authSlice';
+import { fetchGoodies, exchangeGoodie } from '@/redux/features/goodieSlice';
+
+interface Goodie {
+  _id: string;
+  name: string;
+  description: string;
+  points_cost: number;
+  image_url: string;
+  stock: number;
+  available: boolean;
+}
+import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { profile, isFetchingProfile, error, token } = useAppSelector((state) => state.auth);
+  const { goodies, status } = useAppSelector((state) => state.goodie);
+  const [selectedGoodie, setSelectedGoodie] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -20,7 +34,20 @@ export default function ProfilePage() {
       return;
     }
     dispatch(getProfile());
+    dispatch(fetchGoodies());
   }, [dispatch, router, token]);
+
+  const handleExchange = async (goodieId: string) => {
+    try {
+      await dispatch(exchangeGoodie(goodieId)).unwrap();
+      toast.success('Échange réussi !');
+      dispatch(getProfile()); // Refresh user points
+      dispatch(fetchGoodies()); // Refresh goodies list
+      setSelectedGoodie(null);
+    } catch (error: any) {
+      toast.error(error || 'Une erreur est survenue');
+    }
+  };
 
   if (isFetchingProfile) {
     return (
@@ -117,6 +144,69 @@ export default function ProfilePage() {
                   {profile.phone || 'Non renseigné'}
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Points et Goodies */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Mes points et récompenses</h3>
+            <div className="p-4 bg-gray-50 rounded-lg mb-6">
+              <p className="text-sm text-gray-600">Points disponibles</p>
+              <p className="text-2xl font-bold text-gray-900">{profile.points || 0}</p>
+            </div>
+
+            {/* Liste des Goodies */}
+            <div className="mt-6">
+              <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+                <FaGift className="mr-2" /> Échanger mes points
+              </h4>
+              {status === 'loading' ? (
+                <p>Chargement des goodies...</p>
+              ) : goodies && goodies.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {goodies.map((goodie) => (
+                    <div 
+                      key={goodie._id} 
+                      className="border rounded-lg p-4 bg-white"
+                    >
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-gray-900">{goodie.name}</h5>
+                        <p className="text-sm text-gray-600">{goodie.description}</p>
+                        <div className="mt-2">
+                          <span className="text-sm font-medium text-blue-600">{goodie.points_cost} points</span>
+                        </div>
+                        {goodie.available && (
+                          <Button
+                            text={selectedGoodie === goodie._id ? 'Confirmer ?' : 'Échanger'}
+                            color={selectedGoodie === goodie._id ? 'danger' : 'primary'}
+                            variant="solid"
+                            size="sm"
+                            className="mt-2 w-full"
+                            disabled={profile.points < goodie.points_cost}
+                            onClick={() => {
+                              if (selectedGoodie === goodie._id) {
+                                handleExchange(goodie._id);
+                              } else {
+                                setSelectedGoodie(goodie._id);
+                              }
+                            }}
+                          />
+                        )}
+                        {!goodie.available && (
+                          <p className="text-sm text-red-500 mt-2">Non disponible</p>
+                        )}
+                        {goodie.available && profile.points < goodie.points_cost && (
+                          <p className="text-xs text-red-500 mt-1">
+                            Il vous manque {goodie.points_cost - profile.points} points
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">Aucun goodie disponible pour le moment.</p>
+              )}
             </div>
           </div>
 
