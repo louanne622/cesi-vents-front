@@ -9,6 +9,7 @@ import { createTicket } from '@/redux/features/ticketSlice';
 import { createTransaction } from '@/redux/features/transactionSlice';
 import { fetchEventById, increaseCapacity } from '@/redux/features/eventSlice';
 import { getPromotionByCode } from '@/redux/features/promotionSlice';
+import { getProfile } from '@/redux/features/authSlice';
 import { RootState } from '@/redux/store';
 import toast from 'react-hot-toast';
 
@@ -166,13 +167,11 @@ export default function EventPaymentPage() {
 
       await dispatch(createTicket(ticketData) as any);
 
-
-      // Rediriger vers la page de confirmation
+      // Refresh profile to get updated points
+      await dispatch(getProfile() as any);
       setPaymentComplete(true);
       toast.success('Paiement effectué avec succès !');
-      setTimeout(() => {
-        router.push(`/events/${params.id}/confirmation`);
-      }, 2000);
+      router.push('/profile');
     } catch (error: any) {
       console.error('Erreur lors du paiement:', error);
       toast.error(error.message || 'Une erreur est survenue lors du paiement');
