@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Button from '../components/ui/Button';
 import { FaUser, FaEdit, FaCalendarAlt, FaMapMarkerAlt, FaGift } from 'react-icons/fa';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { getProfile } from '@/redux/features/authSlice';
