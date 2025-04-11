@@ -12,7 +12,6 @@ import { clearTokens } from "@/utils/cookieService";
 import { RootState } from "@/redux/store";
 import { useEffect } from "react";
 
-
 const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
@@ -68,13 +67,25 @@ const Navbar = () => {
       href: "/profile",
       label: "Profil",
       icon: FaUser,
-    },
-    {
-      href: "/admin/dashboard",
-      label: "Dashboard",
-      icon: FaChartLine,
     }
   ];
+
+  // Ajouter le dashboard uniquement si l'utilisateur est connecté et admin
+  if (token && currentUser?.role === "admin") {
+    navItems.push({
+      href: "/admin/dashboard",
+      label: "Tableau de bord",
+      icon: FaChartLine,
+    });
+  }
+
+  if (token && currentUser?.role === "clubleader") {
+    navItems.push({
+      href: "/clubleader",
+      label: "Gestion de club",
+      icon: FaUsers,
+    });
+  }
 
   const adminNavItems = [
     {
@@ -108,14 +119,6 @@ const Navbar = () => {
       icon: FaTicketAlt,
     },
   ];
-
-  if (currentUser?.role === "clubleader") {
-    navItems.push({
-      href: "/clubleader",
-      label: "Gestion de club",
-      icon: FaUsers,
-    });
-  }
 
   return (
     <>
@@ -197,20 +200,20 @@ const Navbar = () => {
         <div className="p-4 border-t border-gray-200">
           {token ? (
             <button 
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
-          >
-            <FaSignOutAlt className="h-5 w-5" />
-            <span className="font-medium">Déconnexion</span>
-          </button>
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
+            >
+              <FaSignOutAlt className="h-5 w-5" />
+              <span className="font-medium">Déconnexion</span>
+            </button>
           ) : (  
             <Link 
-            href="/login" 
+              href="/login" 
               className="flex items-center justify-center space-x-2 px-4 py-3 bg-[#fbe216] text-gray-900 rounded-lg hover:bg-[#e6cf14] transition-colors duration-200 w-full"
             >
               <FaUser className="h-5 w-5" />
-            <span className="font-medium">Connexion</span>
-          </Link>
+              <span className="font-medium">Connexion</span>
+            </Link>
           )}
         </div>
       </aside>

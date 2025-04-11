@@ -438,7 +438,7 @@ export default function CouponsPage() {
                                     <tr key={promotion._id}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{promotion.promotion_code}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {promotion.id_club && promotion.id_club.length > 0
+                                            {Array.isArray(promotion.id_club) && promotion.id_club.length > 0
                                                 ? promotion.id_club.map((clubId) => selectedClubNames[clubId] || 'Unknown Club').join(', ')
                                                 : 'N/A'}
                                         </td>
